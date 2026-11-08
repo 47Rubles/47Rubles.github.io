@@ -58,17 +58,6 @@
       <div class="wallpaper-crt-lines"></div>
       <div class="wallpaper-neco-wrap" id="wallpaper-neco-wrap">
         <img src="assets/wallpaper/silhouette.png" alt="Neco Shadow" class="wallpaper-silhouette" id="wallpaper-silhouette" draggable="false">
-        <!-- Authentic Melty Blood Pixel-Art Eyes -->
-        <div class="wallpaper-pixel-eyes" id="wallpaper-eyes">
-          <div class="pixel-eye eye-left" id="eye-left">
-            <img src="assets/wallpaper/pixel_eye_left_bg.png" class="pixel-eye-bg" alt="" draggable="false">
-            <img src="assets/wallpaper/pixel_pupil_l.png" class="pixel-pupil" id="pupil-left" alt="" draggable="false">
-          </div>
-          <div class="pixel-eye eye-right" id="eye-right">
-            <img src="assets/wallpaper/pixel_eye_right_bg.png" class="pixel-eye-bg" alt="" draggable="false">
-            <img src="assets/wallpaper/pixel_pupil_r.png" class="pixel-pupil" id="pupil-right" alt="" draggable="false">
-          </div>
-        </div>
         <div class="wallpaper-glitch-bar" id="wallpaper-glitch-bar"></div>
       </div>
     </div>
@@ -266,10 +255,10 @@
   </div>
 
   <!-- Window 3: Gallery Explorer -->
-  <div class="window" id="win-gallery" style="top: 90px; left: 120px; width: 560px; display: none;">
+  <div class="window" id="win-gallery" style="top: 80px; left: 110px; width: 620px; display: none;">
     <div class="title-bar">
       <div class="title-bar-text">
-        <span>🖼</span> Галерея 47R (Ручные арты, Нейро-арт, Мемы)
+        <span>🖼</span> Галерея 47R (Ручные арты, ИИ-арт, Мемы)
       </div>
       <div class="title-bar-controls">
         <button class="title-btn btn-minimize">_</button>
@@ -278,20 +267,41 @@
       </div>
     </div>
     <div class="menu-bar">
-      <span class="menu-item">Вид</span>
-      <span class="menu-item">Сортировка</span>
-      <span class="menu-item" onclick="alert('Все изображения защищены встроенным паттерном 47R. Оригиналы хранятся на локальном диске.')">Защита</span>
+      <span class="menu-item" onclick="window.galleryMgr.switchFolder('all')">Все</span>
+      <span class="menu-item" onclick="window.galleryMgr.switchFolder('hand')">Ручные</span>
+      <span class="menu-item" onclick="window.galleryMgr.switchFolder('ai')">ИИ-арт</span>
+      <span class="menu-item" onclick="window.galleryMgr.switchFolder('memes')">Мемы</span>
+      <span class="menu-item" onclick="alert('Все изображения защищены встроенным знаком «47R».')">Защита</span>
     </div>
     <div class="window-body">
-      <div style="font-size: 11px; margin-bottom: 6px; color: #444;">
-        📁 Каталог: C:\Warehouse\Photo\47R_Protected [Двойной клик для просмотра]
+      <!-- Folder Directory Navigation Toolbar -->
+      <div class="gallery-folder-bar" style="display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap;">
+        <button class="win-btn gallery-tab active" data-folder="all" onclick="window.galleryMgr.switchFolder('all')">
+          📁 Все работы (<span id="count-all">9</span>)
+        </button>
+        <button class="win-btn gallery-tab" data-folder="hand" onclick="window.galleryMgr.switchFolder('hand')">
+          🎨 Ручная работа (<span id="count-hand">3</span>)
+        </button>
+        <button class="win-btn gallery-tab" data-folder="ai" onclick="window.galleryMgr.switchFolder('ai')">
+          🤖 ИИ арты (<span id="count-ai">6</span>)
+        </button>
+        <button class="win-btn gallery-tab" data-folder="memes" onclick="window.galleryMgr.switchFolder('memes')">
+          🐸 Мемы (<span id="count-memes">0</span>)
+        </button>
       </div>
+
+      <!-- Path Breadcrumb Bar -->
+      <div class="gallery-address-bar" style="background: #fff; border: 1px inset #808080; padding: 2px 6px; font-size: 11px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+        <span style="color: #666;">Каталог:</span>
+        <strong id="gallery-current-path">C:\Галерея_47R\Все работы</strong>
+      </div>
+
       <div class="gallery-grid" id="gallery-grid-el"></div>
     </div>
   </div>
 
   <!-- Window 4: Image Viewer Modal -->
-  <div class="window" id="win-image-viewer" style="top: 50px; left: 220px; width: 520px; display: none; z-index: 500;">
+  <div class="window" id="win-image-viewer" style="top: 50px; left: 220px; width: 540px; display: none; z-index: 500;">
     <div class="title-bar">
       <div class="title-bar-text">
         <span>🔍</span> Просмотр изображений — <span id="viewer-title">Работа</span>
@@ -302,13 +312,18 @@
     </div>
     <div class="window-body">
       <div class="image-viewer-body">
-        <div class="image-viewer-frame">
-          <img id="viewer-img" src="" alt="Viewer" oncontextmenu="return false;">
+        <div class="image-viewer-frame" style="position: relative; min-height: 220px; display: flex; align-items: center; justify-content: center; background: #1a1a1a;">
+          <div id="viewer-loading" style="color: #ffff88; font-size: 12px; font-family: var(--font-mono); display: none;">
+            [ ЗАГРУЗКА ИЗОБРАЖЕНИЯ... ]
+          </div>
+          <img id="viewer-img" src="" alt="Viewer" oncontextmenu="return false;" style="display: none; max-width: 100%; max-height: 480px; object-fit: contain;">
         </div>
-        <div style="font-size: 11px; color: #555;" id="viewer-info">
-          Защищено паттерном 47R
+        <div style="font-size: 11px; color: #555; margin-top: 6px;" id="viewer-info">
+          Защищено паттерном «47R»
         </div>
-        <button class="win-btn" onclick="window.winManager.closeWindow('win-image-viewer')">Закрыть</button>
+        <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+          <button class="win-btn" onclick="window.winManager.closeWindow('win-image-viewer')">Закрыть</button>
+        </div>
       </div>
     </div>
   </div>

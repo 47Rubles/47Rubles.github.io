@@ -1,8 +1,36 @@
 [
   {
+    "id": "hammer",
+    "title": "Neco-Arc с молотом",
+    "folder": "hand",
+    "category": "Ручная работа",
+    "thumb": "assets/gallery/thumb_hammer.jpg",
+    "file": "assets/gallery/view_hammer.jpg",
+    "watermark": "Защищено паттерном «47R»"
+  },
+  {
+    "id": "gun1",
+    "title": "Neco-Arc с пушкой",
+    "folder": "hand",
+    "category": "Ручная работа",
+    "thumb": "assets/gallery/thumb_gun1.jpg",
+    "file": "assets/gallery/view_gun1.jpg",
+    "watermark": "Защищено паттерном «47R»"
+  },
+  {
+    "id": "agr_sketch",
+    "title": "Neco-Arc Rage + Скетч",
+    "folder": "hand",
+    "category": "Ручная работа",
+    "thumb": "assets/gallery/thumb_agr_sketch.jpg",
+    "file": "assets/gallery/view_agr_sketch.jpg",
+    "watermark": "Защищено паттерном «47R»"
+  },
+  {
     "id": "ptrd",
     "title": "Neco-Arc с ПТРД",
-    "category": "Оружие / Скетч",
+    "folder": "ai",
+    "category": "ИИ арт",
     "thumb": "assets/gallery/thumb_ptrd.jpg",
     "file": "assets/gallery/view_ptrd.jpg",
     "watermark": "Защищено паттерном «47R»"
@@ -10,7 +38,8 @@
   {
     "id": "stalcarc",
     "title": "StalcArc (S.T.A.L.K.E.R.)",
-    "category": "Арт по мотивам Зоны",
+    "folder": "ai",
+    "category": "ИИ арт",
     "thumb": "assets/gallery/thumb_stalcarc.jpg",
     "file": "assets/gallery/view_stalcarc.jpg",
     "watermark": "Защищено паттерном «47R»"
@@ -18,7 +47,8 @@
   {
     "id": "necoz",
     "title": "Neco-Z",
-    "category": "Иллюстрация",
+    "folder": "ai",
+    "category": "ИИ арт",
     "thumb": "assets/gallery/thumb_necoz.jpg",
     "file": "assets/gallery/view_necoz.jpg",
     "watermark": "Защищено паттерном «47R»"
@@ -26,7 +56,8 @@
   {
     "id": "zima",
     "title": "Кот в варежках (Зима)",
-    "category": "Иллюстрация",
+    "folder": "ai",
+    "category": "ИИ арт",
     "thumb": "assets/gallery/thumb_zima.jpg",
     "file": "assets/gallery/view_zima.jpg",
     "watermark": "Защищено паттерном «47R»"
@@ -34,7 +65,8 @@
   {
     "id": "fisheye",
     "title": "Neco-Arc FishEye Ч/Б",
-    "category": "Графика",
+    "folder": "ai",
+    "category": "ИИ арт",
     "thumb": "assets/gallery/thumb_fisheye.jpg",
     "file": "assets/gallery/view_fisheye.jpg",
     "watermark": "Защищено паттерном «47R»"
@@ -42,33 +74,10 @@
   {
     "id": "bw",
     "title": "Ч/Б Неко-Арк",
-    "category": "Ручная графика",
+    "folder": "ai",
+    "category": "ИИ арт",
     "thumb": "assets/gallery/thumb_bw.jpg",
     "file": "assets/gallery/view_bw.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "gun1",
-    "title": "Neco-Arc с пушкой",
-    "category": "Оружие / Скетч",
-    "thumb": "assets/gallery/thumb_gun1.jpg",
-    "file": "assets/gallery/view_gun1.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "hammer",
-    "title": "Neco-Arc с молотом",
-    "category": "Арт / Оружие",
-    "thumb": "assets/gallery/thumb_hammer.jpg",
-    "file": "assets/gallery/view_hammer.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "agr_sketch",
-    "title": "Neco-Arc Rage + Скетч",
-    "category": "Концепт / Скетч",
-    "thumb": "assets/gallery/thumb_agr_sketch.jpg",
-    "file": "assets/gallery/view_agr_sketch.jpg",
     "watermark": "Защищено паттерном «47R»"
   }
 ]

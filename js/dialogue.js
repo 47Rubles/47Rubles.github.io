@@ -45,12 +45,23 @@ class DialogueManager {
   init() {
     this.renderCurrentLine();
 
-    // Click on dialogue area advances
-    this.container.parentElement.addEventListener('click', (e) => {
-      if (this.isFinished) return;
-      if (e.target.closest('#dialogue-input-area')) return;
-      this.next();
-    });
+    // Click on entire dialogue box or hint advances dialogue
+    const dialogueBox = this.container ? (this.container.closest('.dialogue-content') || this.container.parentElement) : null;
+    if (dialogueBox) {
+      dialogueBox.addEventListener('click', (e) => {
+        if (this.isFinished) return;
+        if (e.target.closest('#dialogue-input-area')) return;
+        this.next();
+      });
+    }
+
+    if (this.hintEl) {
+      this.hintEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.isFinished) return;
+        this.next();
+      });
+    }
 
     if (this.submitBtn) {
       this.submitBtn.addEventListener('click', (e) => {
