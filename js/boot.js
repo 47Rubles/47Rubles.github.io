@@ -76,14 +76,9 @@ class BootManager {
         this.bootScreen.style.display = 'none';
         document.body.classList.remove('screen-glitch');
 
-        // Materialize Neco Arc
+        // Materialize Neco Arc: Spawn from ground with Bonjour!
         if (window.necoPet) {
-          window.necoPet.setState('shock');
-          window.necoPet.playSound('burunyuu');
-          window.necoPet.speak("Buru-nyuu~! Система 47OS захвачена!", 3500);
-          setTimeout(() => {
-            window.necoPet.setState('idle');
-          }, 1500);
+          window.necoPet.spawnFromGround();
         }
 
         // Open default windows

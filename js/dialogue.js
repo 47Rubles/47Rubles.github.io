@@ -99,7 +99,8 @@ class DialogueManager {
           window.winManager.closeWindow('win-dialogue');
         }
         if (window.necoPet) {
-          window.necoPet.speak("Ну вот, обидел человека. Он ушёл.", 3000);
+          window.necoPet.playVoice('goodbye', 0.25);
+          window.necoPet.speak("Ну вот, ушёл. Гудбай!", 2500);
         }
       }
     }
