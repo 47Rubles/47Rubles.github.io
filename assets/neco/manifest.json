@@ -24,9 +24,10 @@
       "assets/neco/walk_6.png",
       "assets/neco/walk_7.png",
       "assets/neco/walk_8.png",
-      "assets/neco/walk_9.png"
+      "assets/neco/walk_9.png",
+      "assets/neco/walk_10.png"
     ],
-    "speed": 80
+    "speed": 85
   },
   "run": {
     "frames": [
@@ -37,6 +38,17 @@
       "assets/neco/run_4.png",
       "assets/neco/run_5.png",
       "assets/neco/run_6.png"
+    ],
+    "speed": 70
+  },
+  "backdash": {
+    "frames": [
+      "assets/neco/backdash_0.png",
+      "assets/neco/backdash_1.png",
+      "assets/neco/backdash_2.png",
+      "assets/neco/backdash_3.png",
+      "assets/neco/backdash_4.png",
+      "assets/neco/backdash_5.png"
     ],
     "speed": 65
   },
@@ -49,7 +61,7 @@
       "assets/neco/turn_4.png",
       "assets/neco/turn_5.png"
     ],
-    "speed": 90
+    "speed": 100
   },
   "sleep": {
     "frames": [
@@ -63,7 +75,7 @@
       "assets/neco/sleep_7.png",
       "assets/neco/sleep_8.png"
     ],
-    "speed": 200
+    "speed": 220
   },
   "shock": {
     "frames": [
@@ -74,6 +86,6 @@
       "assets/neco/shock_4.png",
       "assets/neco/shock_5.png"
     ],
-    "speed": 90
+    "speed": 100
   }
 }

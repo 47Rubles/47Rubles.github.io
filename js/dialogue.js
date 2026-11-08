@@ -107,10 +107,6 @@ class DialogueManager {
 
   typewrite(text) {
     this.container.textContent = text;
-    // Play light click sound
-    if (window.necoPet) {
-      window.necoPet.playSound('nya');
-    }
   }
 
   next() {

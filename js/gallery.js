@@ -24,33 +24,7 @@ class GalleryManager {
       }
     } catch (e) {
       console.warn("Could not load gallery manifest:", e);
-    }
-
-    if (!this.items || this.items.length === 0) {
-      // Fallback sample
-      this.items = [
-        {
-          id: "NecoArcPTRD",
-          title: "Neco-Arc с ПТРД",
-          category: "Ручной арт",
-          file: "assets/gallery/thumb_NecoArcPTRD.jpg",
-          watermark: "Protected with 47R pattern"
-        },
-        {
-          id: "StalcArc",
-          title: "StalcArc (S.T.A.L.K.E.R.)",
-          category: "Арт по мотивам Зоны",
-          file: "assets/gallery/thumb_StalcArc.jpg",
-          watermark: "Protected with 47R pattern"
-        },
-        {
-          id: "Cat_posing_with_mittens",
-          title: "Котейка в варежках",
-          category: "Иллюстрация",
-          file: "assets/gallery/thumb_Cat_posing_with_mittens_202607211109.jpg",
-          watermark: "Protected with 47R pattern"
-        }
-      ];
+      this.items = [];
     }
 
     this.render();
@@ -59,6 +33,17 @@ class GalleryManager {
   render() {
     if (!this.gridEl) return;
     this.gridEl.innerHTML = '';
+
+    if (!this.items || this.items.length === 0) {
+      this.gridEl.innerHTML = `
+        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 180px; color: #666; font-size: 11px; text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 8px;">📁</div>
+          <div>Папка пуста.</div>
+          <div style="margin-top: 4px; color: #888;">Работы появятся здесь, когда ты выберешь, что выложить.</div>
+        </div>
+      `;
+      return;
+    }
 
     this.items.forEach(item => {
       const card = document.createElement('div');
@@ -92,10 +77,6 @@ class GalleryManager {
 
     if (window.winManager) {
       window.winManager.openWindow('win-image-viewer');
-    }
-
-    if (window.necoPet) {
-      window.necoPet.playSound('nya');
     }
   }
 }
