@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "id": "ptrd",
+    "title": "Neco-Arc с ПТРД",
+    "category": "Оружие / Скетч",
+    "thumb": "assets/gallery/thumb_NecoArcPTRD.jpg",
+    "file": "assets/gallery/NecoArcPTRD.png"
+  },
+  {
+    "id": "stalcarc",
+    "title": "StalcArc (S.T.A.L.K.E.R.)",
+    "category": "Арт по мотивам Зоны",
+    "thumb": "assets/gallery/thumb_StalcArc.jpg",
+    "file": "assets/gallery/StalcArc.png"
+  },
+  {
+    "id": "necoz",
+    "title": "Neco-Z",
+    "category": "Иллюстрация",
+    "thumb": "assets/gallery/thumb_NecoZ.jpg",
+    "file": "assets/gallery/NecoZ.png"
+  },
+  {
+    "id": "zima",
+    "title": "Кот в варежках (Зима)",
+    "category": "Иллюстрация",
+    "thumb": "assets/gallery/thumb_LP_Cat_ZIMA.jpg",
+    "file": "assets/gallery/LP_Cat_ZIMA.jpeg"
+  },
+  {
+    "id": "fisheye",
+    "title": "Neco-Arc FishEye Ч/Б",
+    "category": "Графика",
+    "thumb": "assets/gallery/thumb_art_neco_fisheye.jpg",
+    "file": "assets/gallery/art_neco_fisheye.png"
+  },
+  {
+    "id": "bw",
+    "title": "Ч/Б Неко-Арк",
+    "category": "Ручная графика",
+    "thumb": "assets/gallery/thumb_art_neco_bw.jpg",
+    "file": "assets/gallery/art_neco_bw.png"
+  }
+]

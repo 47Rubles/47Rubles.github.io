@@ -28,8 +28,8 @@ class NecoPet {
     this.isEnforcingMusic = false;
     this.idleCountdown = 16;
     
-    // Image preloader
-    this.imageCache = {};
+    // Image preloader & memory cache link
+    this.imageCache = window.globalImageCache || {};
     
     // Hit sounds list from 2100 to 2107 (a and b) from Battle root
     this.hitSoundNames = [];
@@ -38,27 +38,35 @@ class NecoPet {
       this.hitSoundNames.push(`hit_${i}_b.wav`);
     }
 
-    // Audio pool
+    const getAudio = (path) => (window.globalAudioCache && window.globalAudioCache[path]) || new Audio(path);
+
+    // Pre-allocated Audio pools
     this.sounds = {
-      bonjour: new Audio('assets/audio/bonjour.wav'),
-      arigato: new Audio('assets/audio/arigato.wav'),
-      goodbye: new Audio('assets/audio/goodbye.wav'),
-      block_sfx: new Audio('assets/audio/sfx_block.wav'),
-      burunyuu: new Audio('assets/audio/burunyuu.wav')
+      bonjour: getAudio('assets/audio/bonjour.wav'),
+      arigato: getAudio('assets/audio/arigato.wav'),
+      goodbye: getAudio('assets/audio/goodbye.wav'),
+      block_sfx: getAudio('assets/audio/sfx_block.wav'),
+      burunyuu: getAudio('assets/audio/burunyuu.wav')
     };
+
+    this.hitAudios = this.hitSoundNames.map(name => getAudio(`assets/audio/${name}`));
 
     this.manifest = null;
     this.init();
   }
 
   async init() {
-    try {
-      const res = await fetch('assets/neco/manifest.json');
-      this.manifest = await res.json();
-      this.preloadAllFrames();
-    } catch (e) {
-      console.warn("Could not load neco manifest:", e);
+    if (window.necoManifest) {
+      this.manifest = window.necoManifest;
+    } else {
+      try {
+        const res = await fetch('assets/neco/manifest.json');
+        this.manifest = await res.json();
+      } catch (e) {
+        console.warn("Could not load neco manifest:", e);
+      }
     }
+    this.preloadAllFrames();
 
     this.updatePosition();
     this.setState('idle');
@@ -110,10 +118,15 @@ class NecoPet {
 
   playRandomHitSound() {
     try {
-      const idx = Math.floor(Math.random() * this.hitSoundNames.length);
-      const audio = new Audio(`assets/audio/${this.hitSoundNames[idx]}`);
-      audio.volume = 0.22;
-      audio.play().catch(() => {});
+      if (this.hitAudios && this.hitAudios.length > 0) {
+        const idx = Math.floor(Math.random() * this.hitAudios.length);
+        const audio = this.hitAudios[idx];
+        if (audio) {
+          audio.currentTime = 0;
+          audio.volume = 0.22;
+          audio.play().catch(() => {});
+        }
+      }
 
       if (this.sounds.block_sfx) {
         this.sounds.block_sfx.currentTime = 0;

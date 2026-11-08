@@ -50,7 +50,7 @@ class GalleryManager {
       card.className = 'gallery-card';
       card.innerHTML = `
         <div class="gallery-thumb-wrap">
-          <img src="${item.file}" alt="${item.title}" loading="lazy">
+          <img src="${item.thumb || item.file}" alt="${item.title}" loading="lazy">
         </div>
         <div class="gallery-title">${item.title}</div>
       `;
@@ -73,7 +73,7 @@ class GalleryManager {
     if (!this.viewerWinEl) return;
     this.viewerImgEl.src = item.file;
     this.viewerTitleEl.textContent = item.title;
-    this.viewerInfoEl.textContent = `${item.category} • [Водяной знак: паттерн «47R»]`;
+    this.viewerInfoEl.textContent = `${item.category} • Автор: 47Rubles`;
 
     if (window.winManager) {
       window.winManager.openWindow('win-image-viewer');

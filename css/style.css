@@ -67,6 +67,42 @@
   color: #a0ffa0;
 }
 
+.boot-progress-wrap {
+  margin: 15px 0 10px 0;
+  max-width: 640px;
+  width: 100%;
+}
+
+.boot-status-text {
+  font-size: 12px;
+  color: #ffff77;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+}
+
+.boot-progress-border {
+  border: 2px solid #00ff66;
+  background: #021005;
+  height: 20px;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.boot-progress-bar {
+  height: 100%;
+  width: 0%;
+  background-color: #00ff66;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+  transition: width 0.08s ease-out;
+}
+
+.boot-count-text {
+  font-size: 11px;
+  color: #88ff88;
+  margin-top: 5px;
+  font-family: var(--font-mono);
+}
+
 .boot-prompt {
   color: #ffffff;
   font-weight: bold;
@@ -74,6 +110,17 @@
   text-align: center;
   padding: 10px;
   border-top: 1px dashed #444;
+}
+
+.boot-prompt.ready {
+  color: #00ffcc;
+  font-size: 15px;
+  text-shadow: 0 0 8px #00ffcc;
+}
+
+.boot-prompt.waiting {
+  color: #ffaa00;
+  font-size: 13px;
 }
 
 @keyframes blink {
@@ -119,9 +166,12 @@
   flex-direction: row;
   gap: 20px;
   z-index: 1;
+  overflow: hidden;
 }
 
 .desktop-column {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -129,6 +179,212 @@
 
 .desktop-column.desktop-right {
   margin-left: auto;
+}
+
+/* Live Interactive Wallpaper */
+#desktop-wallpaper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  user-select: none;
+  background: radial-gradient(circle at 50% 50%, #006060 0%, #004545 60%, #002525 100%);
+}
+
+.wallpaper-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+  pointer-events: none;
+}
+
+.wallpaper-crt-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.12) 3px,
+    rgba(0, 0, 0, 0.12) 6px
+  );
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.wallpaper-neco-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, 84vw);
+  aspect-ratio: 960 / 768;
+  pointer-events: none;
+  animation: shadowBreathe 5.5s ease-in-out infinite;
+  transition: filter 0.15s ease-out;
+}
+
+.wallpaper-silhouette {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.9));
+  pointer-events: none;
+}
+
+/* Glowing Cat Eyes */
+.wallpaper-eyes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wallpaper-eye {
+  position: absolute;
+  width: 3.5%;
+  height: 4.4%;
+  background: radial-gradient(circle at 45% 40%, #ffffff 0%, #ff2255 45%, #aa0022 100%);
+  border-radius: 50% 50% 46% 46%;
+  box-shadow: 
+    0 0 10px #ff2255,
+    0 0 24px rgba(255, 34, 85, 0.85),
+    inset 0 0 4px #ffffff;
+  overflow: hidden;
+  transform-origin: center;
+  transition: transform 0.08s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wallpaper-eye.eye-left {
+  left: 40.8%;
+  top: 36.2%;
+  transform: rotate(-3deg);
+}
+
+.wallpaper-eye.eye-right {
+  left: 51.0%;
+  top: 36.2%;
+  transform: rotate(3deg);
+}
+
+.wallpaper-pupil {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30%;
+  height: 70%;
+  background: #1a0005;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  transition: transform 0.05s linear;
+}
+
+/* Blinking state */
+.wallpaper-eyes.blinking .wallpaper-eye {
+  transform: scaleY(0.08);
+  filter: brightness(2);
+}
+
+/* Narrowing / Menacing state */
+.wallpaper-eyes.menacing .wallpaper-eye {
+  transform: scaleY(0.4) scaleX(1.15);
+  box-shadow: 0 0 18px #ff0033, 0 0 35px #ff0055, inset 0 0 4px #ffffaa;
+}
+
+/* Music Pulsing */
+#desktop-wallpaper.is-playing .wallpaper-eye {
+  animation: eyeMusicPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes eyeMusicPulse {
+  0% {
+    box-shadow: 0 0 10px #ff2255, 0 0 20px rgba(255, 34, 85, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 20px #ff4477, 0 0 38px rgba(255, 50, 100, 1), 0 0 55px rgba(255, 0, 60, 0.6);
+  }
+}
+
+/* Breathing motion */
+@keyframes shadowBreathe {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.018);
+  }
+}
+
+/* Glitch scanline sweep */
+.wallpaper-glitch-bar {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 200, 0.5), rgba(255, 0, 100, 0.7), transparent);
+  box-shadow: 0 0 8px rgba(0, 255, 200, 0.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Chromatic split glitch on silhouette */
+.wallpaper-neco-wrap.glitching {
+  animation: shadowGlitch 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes shadowGlitch {
+  0% {
+    transform: translate(-50%, -50%) skewX(0);
+    filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.85));
+  }
+  25% {
+    transform: translate(-49%, -50%) skewX(3.5deg);
+    filter: drop-shadow(-8px 0 #00ffff) drop-shadow(8px 0 #ff0055);
+  }
+  50% {
+    transform: translate(-51%, -49%) skewX(-2.5deg);
+    filter: drop-shadow(6px 0 #ffff00) drop-shadow(-6px 0 #ff00ff);
+  }
+  75% {
+    transform: translate(-50%, -51%) skewX(1deg);
+    filter: drop-shadow(-4px 0 #00ffaa);
+  }
+  100% {
+    transform: translate(-50%, -50%) skewX(0);
+    filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.85));
+  }
+}
+
+/* Ripple click effect */
+.desktop-click-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 255, 200, 0.7);
+  box-shadow: 0 0 10px rgba(0, 255, 200, 0.5), inset 0 0 8px rgba(255, 0, 80, 0.4);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.1);
+  animation: rippleExpand 0.55s ease-out forwards;
+  z-index: 50;
+}
+
+@keyframes rippleExpand {
+  0% {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  100% {
+    width: 240px;
+    height: 240px;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 /* Desktop Icon */

@@ -29,8 +29,18 @@
       </div>
     </div>
     <div class="boot-log" id="boot-log"></div>
-    <div class="boot-prompt">
-      [ НАЖМИТЕ ЛЮБУЮ КЛАВИШУ ИЛИ КЛИКНИТЕ МЫШЬЮ ДЛЯ ЗАПУСКА СИСТЕМЫ ]
+
+    <!-- Real-time Asset Preloader Bar -->
+    <div class="boot-progress-wrap" id="boot-progress-wrap">
+      <div id="boot-status-text" class="boot-status-text">ИНИЦИАЛИЗАЦИЯ И ПОДЗАГРУЗКА РЕСУРСОВ В ПАМЯТЬ...</div>
+      <div class="boot-progress-border">
+        <div id="boot-progress-bar" class="boot-progress-bar"></div>
+      </div>
+      <div id="boot-count-text" class="boot-count-text">Кэширование ресурсов: 0 / 289 (0%)</div>
+    </div>
+
+    <div class="boot-prompt waiting" id="boot-prompt">
+      [ ИДЁТ КЭШИРОВАНИЕ СПРАЙТОВ И ЗВУКОВ... ПОЖАЛУЙСТА, ПОДОЖДИТЕ ]
     </div>
   </div>
 
@@ -42,6 +52,24 @@
 
   <!-- Desktop Area -->
   <main id="desktop">
+    <!-- Live Interactive Wallpaper Background -->
+    <div id="desktop-wallpaper">
+      <div class="wallpaper-vignette"></div>
+      <div class="wallpaper-crt-lines"></div>
+      <div class="wallpaper-neco-wrap" id="wallpaper-neco-wrap">
+        <img src="assets/wallpaper/silhouette.png" alt="Neco Shadow" class="wallpaper-silhouette" id="wallpaper-silhouette" draggable="false">
+        <div class="wallpaper-eyes" id="wallpaper-eyes">
+          <div class="wallpaper-eye eye-left" id="eye-left">
+            <div class="wallpaper-pupil" id="pupil-left"></div>
+          </div>
+          <div class="wallpaper-eye eye-right" id="eye-right">
+            <div class="wallpaper-pupil" id="pupil-right"></div>
+          </div>
+        </div>
+        <div class="wallpaper-glitch-bar" id="wallpaper-glitch-bar"></div>
+      </div>
+    </div>
+
     <!-- Column 1: System & Core -->
     <div class="desktop-column">
       <!-- Icon: My Computer -->
@@ -487,13 +515,14 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="js/boot.js"></script>
   <script src="js/windows.js"></script>
   <script src="js/neco.js"></script>
+  <script src="js/wallpaper.js"></script>
   <script src="js/player.js"></script>
   <script src="js/dialogue.js"></script>
   <script src="js/gallery.js"></script>
   <script src="js/star.js"></script>
-  <script src="js/boot.js"></script>
 
   <script>
     function updateClock() {
