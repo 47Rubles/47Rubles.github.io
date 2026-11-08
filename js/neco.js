@@ -67,7 +67,7 @@ class NecoPet {
     }
 
     this.updatePosition();
-    this.spawnFromGround();
+    this.setState('idle');
 
     // Mouse tracking
     window.addEventListener('mousemove', (e) => this.onMouseMove(e));
@@ -96,6 +96,12 @@ class NecoPet {
     setInterval(() => this.behaviorLoop(), 4200);
     // Idle watcher
     setInterval(() => this.idleWatcher(), 1000);
+  }
+
+  playSound(name) {
+    if (this.sounds && this.sounds[name]) {
+      this.playVoice(name);
+    }
   }
 
   playRandomHitSound() {

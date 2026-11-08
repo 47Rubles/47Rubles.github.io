@@ -22,7 +22,9 @@ class BootManager {
       this.finishBoot();
     };
 
-    this.bootScreen.addEventListener('click', startBoot);
+    if (this.bootScreen) {
+      this.bootScreen.addEventListener('click', startBoot);
+    }
     document.addEventListener('keydown', startBoot, { once: true });
   }
 
@@ -50,54 +52,65 @@ class BootManager {
         clearInterval(interval);
         return;
       }
-      if (current < lines.length) {
+      if (current < lines.length && this.bootLog) {
         this.bootLog.textContent += lines[current] + "\n";
         current++;
       } else {
         clearInterval(interval);
       }
-    }, 120);
+    }, 110);
   }
 
   finishBoot() {
-    this.bootLog.textContent += "\n>> SYSTEM KERNEL LOADED. STARTING GRAPHICAL SUBSYSTEM...";
-    
-    // Play startup click / alert sound
-    if (window.necoPet) {
-      window.necoPet.playSound('nya');
+    if (this.bootLog) {
+      this.bootLog.textContent += "\n>> SYSTEM KERNEL LOADED. STARTING GRAPHICAL SUBSYSTEM...";
     }
+
+    try {
+      if (window.necoPet && typeof window.necoPet.playVoice === 'function') {
+        window.necoPet.playVoice('bonjour', 0.2);
+      }
+    } catch (e) {}
 
     setTimeout(() => {
       // Trigger CRT Screen Glitch
       document.body.classList.add('screen-glitch');
 
       setTimeout(() => {
-        // Fade out boot screen
-        this.bootScreen.style.display = 'none';
+        // Hide boot screen completely
+        if (this.bootScreen) {
+          this.bootScreen.style.display = 'none';
+        }
         document.body.classList.remove('screen-glitch');
 
-        // Materialize Neco Arc: Spawn from ground with Bonjour!
-        if (window.necoPet) {
-          window.necoPet.spawnFromGround();
-        }
+        // Materialize Neco Arc: Spawn from ground!
+        try {
+          if (window.necoPet && typeof window.necoPet.spawnFromGround === 'function') {
+            window.necoPet.spawnFromGround();
+          }
+        } catch (e) {}
 
         // Open default windows
-        if (window.winManager) {
-          window.winManager.openWindow('win-player');
-          setTimeout(() => {
-            window.winManager.openWindow('win-dialogue');
-          }, 300);
-        }
+        try {
+          if (window.winManager) {
+            window.winManager.openWindow('win-player');
+            setTimeout(() => {
+              window.winManager.openWindow('win-dialogue');
+            }, 300);
+          }
+        } catch (e) {}
 
-        // Start chill music
-        if (window.audioPlayer) {
-          setTimeout(() => {
-            window.audioPlayer.play();
-          }, 800);
-        }
+        // Start music player
+        try {
+          if (window.audioPlayer && typeof window.audioPlayer.play === 'function') {
+            setTimeout(() => {
+              window.audioPlayer.play();
+            }, 600);
+          }
+        } catch (e) {}
 
-      }, 400);
-    }, 400);
+      }, 350);
+    }, 350);
   }
 }
 
