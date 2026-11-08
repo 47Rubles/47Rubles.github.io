@@ -1,0 +1,79 @@
+{
+  "idle": {
+    "frames": [
+      "assets/neco/idle_0.png",
+      "assets/neco/idle_1.png",
+      "assets/neco/idle_2.png",
+      "assets/neco/idle_3.png",
+      "assets/neco/idle_4.png",
+      "assets/neco/idle_5.png",
+      "assets/neco/idle_6.png",
+      "assets/neco/idle_7.png",
+      "assets/neco/idle_8.png"
+    ],
+    "speed": 120
+  },
+  "walk": {
+    "frames": [
+      "assets/neco/walk_0.png",
+      "assets/neco/walk_1.png",
+      "assets/neco/walk_2.png",
+      "assets/neco/walk_3.png",
+      "assets/neco/walk_4.png",
+      "assets/neco/walk_5.png",
+      "assets/neco/walk_6.png",
+      "assets/neco/walk_7.png",
+      "assets/neco/walk_8.png",
+      "assets/neco/walk_9.png"
+    ],
+    "speed": 80
+  },
+  "run": {
+    "frames": [
+      "assets/neco/run_0.png",
+      "assets/neco/run_1.png",
+      "assets/neco/run_2.png",
+      "assets/neco/run_3.png",
+      "assets/neco/run_4.png",
+      "assets/neco/run_5.png",
+      "assets/neco/run_6.png"
+    ],
+    "speed": 65
+  },
+  "turn": {
+    "frames": [
+      "assets/neco/turn_0.png",
+      "assets/neco/turn_1.png",
+      "assets/neco/turn_2.png",
+      "assets/neco/turn_3.png",
+      "assets/neco/turn_4.png",
+      "assets/neco/turn_5.png"
+    ],
+    "speed": 90
+  },
+  "sleep": {
+    "frames": [
+      "assets/neco/sleep_0.png",
+      "assets/neco/sleep_1.png",
+      "assets/neco/sleep_2.png",
+      "assets/neco/sleep_3.png",
+      "assets/neco/sleep_4.png",
+      "assets/neco/sleep_5.png",
+      "assets/neco/sleep_6.png",
+      "assets/neco/sleep_7.png",
+      "assets/neco/sleep_8.png"
+    ],
+    "speed": 200
+  },
+  "shock": {
+    "frames": [
+      "assets/neco/shock_0.png",
+      "assets/neco/shock_1.png",
+      "assets/neco/shock_2.png",
+      "assets/neco/shock_3.png",
+      "assets/neco/shock_4.png",
+      "assets/neco/shock_5.png"
+    ],
+    "speed": 90
+  }
+}
