@@ -42,6 +42,13 @@ class WindowManager {
     tabEl.className = 'taskbar-tab';
     tabEl.id = `tab-${id}`;
     tabEl.innerHTML = `<span class="tab-title">${titleText}</span>`;
+    
+    // If window is initially hidden, hide its tab!
+    const isInitiallyHidden = (winEl.style.display === 'none' || getComputedStyle(winEl).display === 'none');
+    if (isInitiallyHidden) {
+      tabEl.style.display = 'none';
+    }
+    
     this.taskbarTasksEl.appendChild(tabEl);
 
     const winData = {
@@ -133,7 +140,6 @@ class WindowManager {
     win.minimized = false;
     this.bringToFront(id);
 
-    // Trigger open event on window
     win.el.dispatchEvent(new CustomEvent('win:opened', { detail: { id } }));
   }
 
@@ -148,13 +154,17 @@ class WindowManager {
 
     if (this.activeWindow === id) {
       this.activeWindow = null;
-      // Focus another visible window
       for (const [wId, wData] of this.windows.entries()) {
         if (wData.el.style.display !== 'none' && !wData.minimized) {
           this.bringToFront(wId);
           break;
         }
       }
+    }
+
+    // Check if Neco was standing on this window
+    if (window.necoPet && typeof window.necoPet.checkSurface === 'function') {
+      window.necoPet.checkSurface();
     }
 
     win.el.dispatchEvent(new CustomEvent('win:closed', { detail: { id } }));
@@ -171,6 +181,11 @@ class WindowManager {
 
     if (this.activeWindow === id) {
       this.activeWindow = null;
+    }
+
+    // Check if Neco was standing on this window
+    if (window.necoPet && typeof window.necoPet.checkSurface === 'function') {
+      window.necoPet.checkSurface();
     }
   }
 
@@ -219,7 +234,6 @@ class WindowManager {
       const pageX = e.type.startsWith('touch') ? e.touches[0].pageX : e.pageX;
       const pageY = e.type.startsWith('touch') ? e.touches[0].pageY : e.pageY;
 
-      // Ignore buttons
       if (e.target.closest('.title-bar-controls')) return;
 
       isDragging = true;
@@ -245,12 +259,16 @@ class WindowManager {
       let newLeft = initialLeft + deltaX;
       let newTop = initialTop + deltaY;
 
-      // Boundaries
       newTop = Math.max(0, Math.min(window.innerHeight - 60, newTop));
       newLeft = Math.max(-100, Math.min(window.innerWidth - 100, newLeft));
 
       winEl.style.left = `${newLeft}px`;
       winEl.style.top = `${newTop}px`;
+
+      // Check if Neco lost ground while window is dragged
+      if (window.necoPet && typeof window.necoPet.checkSurface === 'function') {
+        window.necoPet.checkSurface();
+      }
     };
 
     const onPointerUp = () => {
@@ -270,6 +288,19 @@ class WindowManager {
     const win = this.windows.get(this.activeWindow);
     if (!win || win.el.style.display === 'none' || win.minimized) return null;
     return win.el.getBoundingClientRect();
+  }
+
+  getWindowUnderPoint(x, y) {
+    for (const [id, win] of this.windows.entries()) {
+      if (win.el.style.display !== 'none' && !win.minimized) {
+        const rect = win.el.getBoundingClientRect();
+        // Check if x is within window bounds and y is near the top edge
+        if (x >= rect.left - 20 && x <= rect.right + 20 && Math.abs(y - (rect.top - 70)) < 30) {
+          return { id, rect };
+        }
+      }
+    }
+    return null;
   }
 }
 

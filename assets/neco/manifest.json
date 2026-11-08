@@ -13,6 +13,12 @@
     ],
     "speed": 110
   },
+  "walk_start": {
+    "frames": [
+      "assets/neco/walk_start_0.png"
+    ],
+    "speed": 80
+  },
   "walk": {
     "frames": [
       "assets/neco/walk_0.png",
@@ -25,10 +31,15 @@
       "assets/neco/walk_7.png",
       "assets/neco/walk_8.png",
       "assets/neco/walk_9.png",
-      "assets/neco/walk_10.png",
-      "assets/neco/walk_11.png"
+      "assets/neco/walk_10.png"
     ],
     "speed": 75
+  },
+  "walk_lookback_start": {
+    "frames": [
+      "assets/neco/walk_lookback_start_0.png"
+    ],
+    "speed": 80
   },
   "walk_lookback": {
     "frames": [
@@ -42,8 +53,7 @@
       "assets/neco/walk_lookback_7.png",
       "assets/neco/walk_lookback_8.png",
       "assets/neco/walk_lookback_9.png",
-      "assets/neco/walk_lookback_10.png",
-      "assets/neco/walk_lookback_11.png"
+      "assets/neco/walk_lookback_10.png"
     ],
     "speed": 75
   },
@@ -69,7 +79,7 @@
       "assets/neco/turn_6.png",
       "assets/neco/turn_7.png"
     ],
-    "speed": 80
+    "speed": 75
   },
   "parry": {
     "frames": [
@@ -268,40 +278,45 @@
     ],
     "speed": 140
   },
-  "lie_idle": {
+  "lie_start": {
     "frames": [
-      "assets/neco/lie_idle_0.png",
-      "assets/neco/lie_idle_1.png",
-      "assets/neco/lie_idle_2.png",
-      "assets/neco/lie_idle_3.png",
-      "assets/neco/lie_idle_4.png",
-      "assets/neco/lie_idle_5.png",
-      "assets/neco/lie_idle_6.png",
-      "assets/neco/lie_idle_7.png",
-      "assets/neco/lie_idle_8.png",
-      "assets/neco/lie_idle_9.png",
-      "assets/neco/lie_idle_10.png",
-      "assets/neco/lie_idle_11.png",
-      "assets/neco/lie_idle_12.png",
-      "assets/neco/lie_idle_13.png",
-      "assets/neco/lie_idle_14.png",
-      "assets/neco/lie_idle_15.png",
-      "assets/neco/lie_idle_16.png",
-      "assets/neco/lie_idle_17.png",
-      "assets/neco/lie_idle_18.png",
-      "assets/neco/lie_idle_19.png",
-      "assets/neco/lie_idle_20.png",
-      "assets/neco/lie_idle_21.png",
-      "assets/neco/lie_idle_22.png",
-      "assets/neco/lie_idle_23.png",
-      "assets/neco/lie_idle_24.png",
-      "assets/neco/lie_idle_25.png",
-      "assets/neco/lie_idle_26.png",
-      "assets/neco/lie_idle_27.png",
-      "assets/neco/lie_idle_28.png",
-      "assets/neco/lie_idle_29.png"
+      "assets/neco/lie_start_0.png",
+      "assets/neco/lie_start_1.png",
+      "assets/neco/lie_start_2.png",
+      "assets/neco/lie_start_3.png",
+      "assets/neco/lie_start_4.png",
+      "assets/neco/lie_start_5.png",
+      "assets/neco/lie_start_6.png",
+      "assets/neco/lie_start_7.png",
+      "assets/neco/lie_start_8.png",
+      "assets/neco/lie_start_9.png",
+      "assets/neco/lie_start_10.png",
+      "assets/neco/lie_start_11.png",
+      "assets/neco/lie_start_12.png",
+      "assets/neco/lie_start_13.png"
     ],
-    "speed": 110
+    "speed": 100
+  },
+  "lie_loop": {
+    "frames": [
+      "assets/neco/lie_loop_0.png",
+      "assets/neco/lie_loop_1.png",
+      "assets/neco/lie_loop_2.png",
+      "assets/neco/lie_loop_3.png",
+      "assets/neco/lie_loop_4.png",
+      "assets/neco/lie_loop_5.png",
+      "assets/neco/lie_loop_6.png",
+      "assets/neco/lie_loop_7.png",
+      "assets/neco/lie_loop_8.png",
+      "assets/neco/lie_loop_9.png",
+      "assets/neco/lie_loop_10.png",
+      "assets/neco/lie_loop_11.png",
+      "assets/neco/lie_loop_12.png",
+      "assets/neco/lie_loop_13.png",
+      "assets/neco/lie_loop_14.png",
+      "assets/neco/lie_loop_15.png"
+    ],
+    "speed": 100
   },
   "crawl": {
     "frames": [
@@ -325,16 +340,26 @@
       "assets/neco/jump_0.png",
       "assets/neco/jump_1.png",
       "assets/neco/jump_2.png",
-      "assets/neco/jump_3.png",
-      "assets/neco/jump_4.png",
-      "assets/neco/jump_5.png",
-      "assets/neco/jump_6.png",
-      "assets/neco/jump_7.png",
-      "assets/neco/jump_8.png",
-      "assets/neco/jump_9.png",
-      "assets/neco/jump_10.png",
-      "assets/neco/jump_11.png",
-      "assets/neco/jump_12.png"
+      "assets/neco/jump_3.png"
+    ],
+    "speed": 75
+  },
+  "fall": {
+    "frames": [
+      "assets/neco/fall_0.png",
+      "assets/neco/fall_1.png",
+      "assets/neco/fall_2.png"
+    ],
+    "speed": 80
+  },
+  "land": {
+    "frames": [
+      "assets/neco/land_0.png",
+      "assets/neco/land_1.png",
+      "assets/neco/land_2.png",
+      "assets/neco/land_3.png",
+      "assets/neco/land_4.png",
+      "assets/neco/land_5.png"
     ],
     "speed": 75
   },

@@ -16,6 +16,7 @@ class DialogueManager {
 
     this.step = 0;
     this.hasSubmitted = false;
+    this.isFinished = false;
 
     // Narrative scripts
     this.scriptBefore = [
@@ -46,7 +47,7 @@ class DialogueManager {
 
     // Click on dialogue area advances
     this.container.parentElement.addEventListener('click', (e) => {
-      // Don't advance if clicking inside input or submit button
+      if (this.isFinished) return;
       if (e.target.closest('#dialogue-input-area')) return;
       this.next();
     });
@@ -67,16 +68,40 @@ class DialogueManager {
       });
     }
 
+    // Handle reopening after finish
+    if (this.dialogueWindowEl) {
+      this.dialogueWindowEl.addEventListener('win:opened', () => {
+        if (this.isFinished) {
+          this.showFinishedNote();
+        }
+      });
+    }
+
     // Load guestbook messages
     this.loadGuestbookEntries();
   }
 
+  showFinishedNote() {
+    this.speakerEl.textContent = "Записка на столе:";
+    this.container.innerHTML = `
+      <em>«Я же сказал, что ушёл! Хватит открывать этот блокнот.<br>
+      Если хочешь что-то передать — пиши в ярлык «Лог нарушителей».<br>
+      — 47R»</em>
+    `;
+    this.inputArea.style.display = 'none';
+    this.hintEl.textContent = "[47R отсутствует. Окно можно закрыть.]";
+  }
+
   renderCurrentLine() {
+    if (this.isFinished) {
+      this.showFinishedNote();
+      return;
+    }
+
     if (!this.hasSubmitted) {
       if (this.step < this.scriptBefore.length) {
         this.typewrite(this.scriptBefore[this.step]);
         if (this.step === this.scriptBefore.length - 1) {
-          // Show input field
           this.inputArea.style.display = 'flex';
           this.hintEl.textContent = "Напиши что-нибудь и нажми «Отправить»";
         } else {
@@ -94,7 +119,8 @@ class DialogueManager {
           this.hintEl.textContent = "▼ Кликни, чтобы продолжить...";
         }
       } else {
-        // Exit sequence: close window
+        // Exit sequence: close window once
+        this.isFinished = true;
         if (window.winManager) {
           window.winManager.closeWindow('win-dialogue');
         }
@@ -102,6 +128,7 @@ class DialogueManager {
           window.necoPet.playVoice('goodbye', 0.25);
           window.necoPet.speak("Ну вот, ушёл. Гудбай!", 2500);
         }
+        this.showFinishedNote();
       }
     }
   }
@@ -111,7 +138,7 @@ class DialogueManager {
   }
 
   next() {
-    // If on input prompt and not submitted, don't advance yet
+    if (this.isFinished) return;
     if (this.step === this.scriptBefore.length - 1 && !this.hasSubmitted) {
       return;
     }
@@ -140,23 +167,19 @@ class DialogueManager {
     // 2. Open GitHub Issue submission
     const ghIssueUrl = `https://github.com/47Rubles/47Rubles.github.io/issues/new?title=${encodeURIComponent('Запись в лог от ' + newEntry.date)}&body=${encodeURIComponent(val)}`;
     
-    // Prompt visitor if they want to post to GitHub repo
     setTimeout(() => {
       if (confirm("Отправить эту запись прямо в GitHub Issues репозитория 47Rubles, чтобы её видели все?")) {
         window.open(ghIssueUrl, '_blank');
       }
     }, 1200);
 
-    // Advance to "Не знаю что ты там написал..."
     this.step = this.scriptBefore.length;
     this.renderCurrentLine();
   }
 
   async loadGuestbookEntries() {
-    // First load from localStorage
     const localEntries = JSON.parse(localStorage.getItem('47r_messages') || '[]');
     
-    // Try fetching from GitHub Issues API
     try {
       const res = await fetch('https://api.github.com/repos/47Rubles/47Rubles.github.io/issues?state=all');
       if (res.ok) {
@@ -169,11 +192,8 @@ class DialogueManager {
         this.renderGuestbookList([...ghEntries, ...localEntries]);
         return;
       }
-    } catch (e) {
-      // offline / repo not public yet
-    }
+    } catch (e) {}
 
-    // Default sample entries + local
     const fallback = [
       { author: "Neco Arc", text: "Buru-nyuu! Я первая тут написала!", date: "08.11.2026 12:00" },
       { author: "47R", text: "Если вы это читаете, значит 47OS успешно скомпилирована.", date: "08.11.2026 12:05" }

@@ -1,7 +1,8 @@
 /**
  * 47OS Neco Arc Autonomous Daemon - Melty Blood Type Lumina Edition
- * Fixes: Full image preloading, no frame skipping, correct lookback walking direction,
- * flawless turn animation without premature flips, and uninterruptible actions.
+ * Fixes: Single start frames (690, 702) not looping, falling physics from windows (265-273),
+ * calm non-fidgeting turn animation, lying transition (231-244) + loop (245-260),
+ * and correct hit sounds from Battle root.
  */
 
 class NecoPet {
@@ -12,7 +13,7 @@ class NecoPet {
     
     // Physics & State
     this.x = Math.max(50, window.innerWidth - 180);
-    this.y = window.innerHeight - 128; // On taskbar
+    this.y = window.innerHeight - 128; // Floor level on taskbar
     this.targetX = this.x;
     this.targetY = this.y;
     this.facing = 1; // 1 = right, -1 = left
@@ -20,15 +21,17 @@ class NecoPet {
     this.currentFrame = 0;
     this.frameTimer = null;
     this.moveInterval = null;
+    this.fallInterval = null;
     this.isMoving = false;
+    this.isFalling = false;
     this.isBusy = false;
     this.isEnforcingMusic = false;
-    this.idleCountdown = 15;
+    this.idleCountdown = 16;
     
-    // Preloaded image cache
+    // Image preloader
     this.imageCache = {};
     
-    // Hit sounds list from 2100 to 2107 (a and b)
+    // Hit sounds list from 2100 to 2107 (a and b) from Battle root
     this.hitSoundNames = [];
     for (let i = 2100; i <= 2107; i++) {
       this.hitSoundNames.push(`hit_${i}_a.wav`);
@@ -44,7 +47,6 @@ class NecoPet {
       burunyuu: new Audio('assets/audio/burunyuu.wav')
     };
 
-    // Load animations manifest
     this.manifest = null;
     this.init();
   }
@@ -62,7 +64,7 @@ class NecoPet {
     this.setState('idle');
 
     // Mouse tracking
-    window.addEventListener('mousemove', (e) => this.onMouseMove(e));
+    window.addEventListener('mousemove', () => this.onMouseMove());
 
     // Parry / Block when mouse clicks or holds on Neco
     this.el.addEventListener('mousedown', (e) => {
@@ -81,10 +83,11 @@ class NecoPet {
       if (this.y >= floorY - 30) this.y = floorY;
       this.x = Math.min(this.x, window.innerWidth - 100);
       this.updatePosition();
+      this.checkSurface();
     });
 
-    // Wandering loop (checks every 3.5 seconds)
-    setInterval(() => this.behaviorLoop(), 3500);
+    // Wandering loop (checks every 4.5 seconds calmly)
+    setInterval(() => this.behaviorLoop(), 4500);
     // Idle watcher
     setInterval(() => this.idleWatcher(), 1000);
   }
@@ -171,7 +174,6 @@ class NecoPet {
       return;
     }
 
-    // Immediately display frame 0
     this.imgEl.src = anim.frames[0];
 
     this.frameTimer = setInterval(() => {
@@ -210,7 +212,7 @@ class NecoPet {
   }
 
   onParryHit() {
-    this.idleCountdown = 15;
+    this.idleCountdown = 16;
     this.isMoving = false;
     this.isBusy = true;
     clearInterval(this.moveInterval);
@@ -226,8 +228,8 @@ class NecoPet {
   }
 
   onMouseMove() {
-    this.idleCountdown = 15;
-    if (this.currentState === 'lie_idle' || this.currentState === 'phone') {
+    this.idleCountdown = 16;
+    if (this.currentState === 'lie_loop' || this.currentState === 'lie_start' || this.currentState === 'phone') {
       this.wakeUp();
     }
   }
@@ -242,7 +244,58 @@ class NecoPet {
   }
 
   /**
-   * Smooth movement with True Walk (690-701) or Lookback Walk (702-713) or Dash (725-730)
+   * Check if surface beneath Neco still exists (e.g. window moved or closed)
+   */
+  checkSurface() {
+    const floorY = window.innerHeight - 128;
+    if (this.y < floorY - 20 && !this.isFalling && !this.isBusy) {
+      const surface = window.winManager ? window.winManager.getWindowUnderPoint(this.x, this.y) : null;
+      if (!surface) {
+        // Floor disappeared! Fall down to taskbar!
+        this.fallAndLand();
+      }
+    }
+  }
+
+  /**
+   * Falling physics: fall airborne (265-267) -> landing on feet (268-273)
+   */
+  fallAndLand() {
+    if (this.isFalling) return;
+    this.isFalling = true;
+    this.isMoving = false;
+    this.isBusy = true;
+    clearInterval(this.moveInterval);
+
+    const floorY = window.innerHeight - 128;
+    this.setState('fall');
+
+    let vy = 4;
+    clearInterval(this.fallInterval);
+    this.fallInterval = setInterval(() => {
+      vy += 2.5; // gravity
+      this.y += vy;
+
+      if (this.y >= floorY) {
+        this.y = floorY;
+        this.updatePosition();
+        clearInterval(this.fallInterval);
+        this.isFalling = false;
+
+        // Cushion landing on feet (268-273)
+        this.setState('land', () => {
+          this.setState('idle');
+          this.isBusy = false;
+        });
+        return;
+      }
+
+      this.updatePosition();
+    }, 30);
+  }
+
+  /**
+   * Walk with non-repeating start frames (690 / 702), then repeating cycle
    */
   walkTo(targetX, targetY, speed = 2.5, onArrival = null) {
     this.isMoving = true;
@@ -250,29 +303,40 @@ class NecoPet {
     this.targetY = targetY;
 
     const movingRight = targetX > this.x;
+    const useLookback = Math.random() < 0.35;
 
-    // Pick animation
     if (speed > 4) {
       // Dash
       this.facing = movingRight ? 1 : -1;
       this.updatePosition();
       this.setState('dash');
+      this.startMoveLoop(speed, movingRight, onArrival);
+    } else if (useLookback) {
+      // Lookback walk:
+      // Start frame 702 played once, then loop 703-713!
+      this.facing = movingRight ? -1 : 1;
+      this.updatePosition();
+      this.setState('walk_lookback_start', () => {
+        if (this.isMoving) {
+          this.setState('walk_lookback');
+        }
+      });
+      this.startMoveLoop(speed, movingRight, onArrival);
     } else {
-      const useLookback = Math.random() < 0.35;
-      if (useLookback) {
-        // In 702-713 (walk looking back):
-        // Raw sprite moves opposite to gaze. To walk forward while looking behind:
-        this.facing = movingRight ? -1 : 1;
-        this.updatePosition();
-        this.setState('walk_lookback');
-      } else {
-        // Normal walk 690-701:
-        this.facing = movingRight ? 1 : -1;
-        this.updatePosition();
-        this.setState('walk');
-      }
+      // Normal walk:
+      // Start frame 690 played once, then loop 691-701!
+      this.facing = movingRight ? 1 : -1;
+      this.updatePosition();
+      this.setState('walk_start', () => {
+        if (this.isMoving) {
+          this.setState('walk');
+        }
+      });
+      this.startMoveLoop(speed, movingRight, onArrival);
     }
+  }
 
+  startMoveLoop(speed, movingRight, onArrival) {
     clearInterval(this.moveInterval);
     this.moveInterval = setInterval(() => {
       const dx = this.targetX - this.x;
@@ -285,7 +349,6 @@ class NecoPet {
         this.updatePosition();
         clearInterval(this.moveInterval);
         this.isMoving = false;
-        // Face the forward direction upon stopping
         this.facing = movingRight ? 1 : -1;
         this.updatePosition();
         this.setState('idle');
@@ -301,15 +364,13 @@ class NecoPet {
 
   /**
    * Turn animation (741-748):
-   * Plays the complete turn animation first, and only updates this.facing upon completion!
+   * Calm, smooth turn without fidgeting, flipping facing only upon completion.
    */
   turnAround(onComplete = null) {
-    if (this.isBusy || this.isMoving) return;
+    if (this.isBusy || this.isMoving || this.isFalling) return;
     this.isBusy = true;
 
-    // Play turn animation without pre-flipping facing
     this.setState('turn', () => {
-      // At the end of the turn, flip facing!
       this.facing = this.facing * -1;
       this.updatePosition();
       this.setState('idle');
@@ -322,13 +383,12 @@ class NecoPet {
    * Digs into ground -> Teleport glitch -> Digs out at destination
    */
   digTeleport(targetX, targetY, onComplete = null) {
-    if (this.isBusy || this.isMoving) return;
+    if (this.isBusy || this.isMoving || this.isFalling) return;
     this.isBusy = true;
     this.isMoving = true;
     clearInterval(this.moveInterval);
 
     this.setState('dig_in', () => {
-      // Trigger CRT Screen Glitch
       document.body.classList.add('teleport-glitch');
       this.x = targetX;
       this.y = targetY;
@@ -347,22 +407,25 @@ class NecoPet {
   }
 
   behaviorLoop() {
-    // Never interrupt any active movement or busy action!
-    if (this.isBusy || this.isMoving || this.isEnforcingMusic) {
+    if (this.isBusy || this.isMoving || this.isFalling || this.isEnforcingMusic) {
       return;
     }
+
+    // Check if we lost footing on a window
+    this.checkSurface();
+    if (this.isFalling) return;
 
     const action = Math.random();
     const floorY = window.innerHeight - 128;
     const activeBounds = window.winManager ? window.winManager.getActiveWindowBounds() : null;
 
-    if (action < 0.20 && activeBounds && activeBounds.top > 50 && activeBounds.width > 200) {
+    if (action < 0.18 && activeBounds && activeBounds.top > 50 && activeBounds.width > 200) {
       // Dig-teleport onto active window titlebar!
       const targetX = Math.max(30, Math.min(window.innerWidth - 120, activeBounds.left + 50));
       const targetY = Math.max(20, activeBounds.top - 70);
       this.digTeleport(targetX, targetY);
-    } else if (action < 0.50) {
-      // Walk on surface (ensure minimum distance of 140px so full walk cycles play smoothly!)
+    } else if (action < 0.52) {
+      // Walk on surface
       const minX = 40;
       const maxX = window.innerWidth - 120;
       let targetX = Math.floor(Math.random() * (maxX - minX)) + minX;
@@ -370,16 +433,13 @@ class NecoPet {
         targetX = this.x > (window.innerWidth / 2) ? this.x - 180 : this.x + 180;
       }
       this.walkTo(targetX, this.y, 2.5);
-    } else if (action < 0.65) {
+    } else if (action < 0.68) {
       // Teleport across screen or drop back down to taskbar
       const targetY = (this.y < floorY - 30) ? floorY : this.y;
       const targetX = Math.floor(Math.random() * (window.innerWidth - 160)) + 40;
       this.digTeleport(targetX, targetY);
-    } else if (action < 0.80) {
-      // Smooth Turn around
-      this.turnAround();
-    } else if (action < 0.92) {
-      // Play a fun complete animation
+    } else if (action < 0.82) {
+      // Play a fun complete animation (dance, epic, laugh)
       this.isBusy = true;
       const randAct = Math.random();
       if (randAct < 0.35) {
@@ -396,12 +456,16 @@ class NecoPet {
 
   idleWatcher() {
     this.idleCountdown--;
-    if (this.idleCountdown <= 0 && this.currentState === 'idle' && !this.isMoving && !this.isBusy && !this.isEnforcingMusic) {
+    if (this.idleCountdown <= 0 && this.currentState === 'idle' && !this.isMoving && !this.isBusy && !this.isFalling && !this.isEnforcingMusic) {
       this.isBusy = true;
-      if (Math.random() < 0.5) {
+      const r = Math.random();
+      if (r < 0.4) {
         this.setState('phone');
       } else {
-        this.setState('lie_idle');
+        // Lying down: start (231-244), then loop (245-260)!
+        this.setState('lie_start', () => {
+          this.setState('lie_loop');
+        });
       }
     }
   }

@@ -133,6 +133,15 @@
       </svg>
       <div class="desktop-icon-label">GitHub.url</div>
     </div>
+
+    <!-- Desktop Icon 9: Rate / Star -->
+    <div class="desktop-icon" id="icon-star" onclick="window.starManager.openModal()">
+      <svg viewBox="0 0 32 32" id="desktop-star-svg">
+        <polygon points="16,2 20.5,11.5 31,13 23.5,20.5 25.5,31 16,26 6.5,31 8.5,20.5 1,13 11.5,11.5" 
+                 fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,2"/>
+      </svg>
+      <div class="desktop-icon-label">Оценить_47OS</div>
+    </div>
   </main>
 
   <!-- ================= WINDOWS ================= -->
@@ -398,6 +407,19 @@
     </div>
   </div>
 
+  <!-- Window 9: Star Rating Modal -->
+  <div class="window" id="win-star" style="top: 170px; left: 280px; width: 360px; display: none; z-index: 5000;">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <span>★</span> Оценить 47OS 98
+      </div>
+      <div class="title-bar-controls">
+        <button class="title-btn btn-close">✕</button>
+      </div>
+    </div>
+    <div class="window-body" id="star-window-body"></div>
+  </div>
+
   <!-- Start Menu -->
   <div id="start-menu">
     <div class="start-sidebar">47OS 98</div>
@@ -457,6 +479,7 @@
   <script src="js/player.js"></script>
   <script src="js/dialogue.js"></script>
   <script src="js/gallery.js"></script>
+  <script src="js/star.js"></script>
   <script src="js/boot.js"></script>
 
   <script>
