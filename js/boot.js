@@ -121,6 +121,10 @@ class BootManager {
 
     const allUrls = [
       { type: 'image', src: 'assets/wallpaper/silhouette.png' },
+      { type: 'image', src: 'assets/wallpaper/pixel_eye_left_bg.png' },
+      { type: 'image', src: 'assets/wallpaper/pixel_eye_right_bg.png' },
+      { type: 'image', src: 'assets/wallpaper/pixel_pupil_l.png' },
+      { type: 'image', src: 'assets/wallpaper/pixel_pupil_r.png' },
       ...frameList.map(src => ({ type: 'image', src })),
       ...audioList.map(src => ({ type: 'audio', src }))
     ];

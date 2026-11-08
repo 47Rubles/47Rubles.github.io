@@ -103,8 +103,13 @@ class WallpaperManager {
     const oxR = Math.cos(angleR) * moveR;
     const oyR = Math.sin(angleR) * moveR;
 
-    this.pupilLeft.style.transform = `translate(calc(-50% + ${oxL.toFixed(1)}px), calc(-50% + ${oyL.toFixed(1)}px))`;
-    this.pupilRight.style.transform = `translate(calc(-50% + ${oxR.toFixed(1)}px), calc(-50% + ${oyR.toFixed(1)}px))`;
+    const pxL = Math.round(oxL);
+    const pyL = Math.round(oyL);
+    const pxR = Math.round(oxR);
+    const pyR = Math.round(oyR);
+
+    this.pupilLeft.style.transform = `translate(${pxL}px, ${pyL}px)`;
+    this.pupilRight.style.transform = `translate(${pxR}px, ${pyR}px)`;
   }
 
   startBlinkLoop() {

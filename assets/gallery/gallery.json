@@ -3,48 +3,72 @@
     "id": "ptrd",
     "title": "Neco-Arc с ПТРД",
     "category": "Оружие / Скетч",
-    "thumb": "assets/gallery/thumb_NecoArcPTRD.jpg",
-    "file": "assets/gallery/view_NecoArcPTRD.jpg",
+    "thumb": "assets/gallery/thumb_ptrd.jpg",
+    "file": "assets/gallery/view_ptrd.jpg",
     "watermark": "Защищено паттерном «47R»"
   },
   {
     "id": "stalcarc",
     "title": "StalcArc (S.T.A.L.K.E.R.)",
     "category": "Арт по мотивам Зоны",
-    "thumb": "assets/gallery/thumb_StalcArc.jpg",
-    "file": "assets/gallery/view_StalcArc.jpg",
+    "thumb": "assets/gallery/thumb_stalcarc.jpg",
+    "file": "assets/gallery/view_stalcarc.jpg",
     "watermark": "Защищено паттерном «47R»"
   },
   {
     "id": "necoz",
     "title": "Neco-Z",
     "category": "Иллюстрация",
-    "thumb": "assets/gallery/thumb_NecoZ.jpg",
-    "file": "assets/gallery/view_NecoZ.jpg",
+    "thumb": "assets/gallery/thumb_necoz.jpg",
+    "file": "assets/gallery/view_necoz.jpg",
     "watermark": "Защищено паттерном «47R»"
   },
   {
     "id": "zima",
     "title": "Кот в варежках (Зима)",
     "category": "Иллюстрация",
-    "thumb": "assets/gallery/thumb_LP_Cat_ZIMA.jpg",
-    "file": "assets/gallery/view_LP_Cat_ZIMA.jpg",
+    "thumb": "assets/gallery/thumb_zima.jpg",
+    "file": "assets/gallery/view_zima.jpg",
     "watermark": "Защищено паттерном «47R»"
   },
   {
     "id": "fisheye",
     "title": "Neco-Arc FishEye Ч/Б",
     "category": "Графика",
-    "thumb": "assets/gallery/thumb_art_neco_fisheye.jpg",
-    "file": "assets/gallery/view_art_neco_fisheye.jpg",
+    "thumb": "assets/gallery/thumb_fisheye.jpg",
+    "file": "assets/gallery/view_fisheye.jpg",
     "watermark": "Защищено паттерном «47R»"
   },
   {
     "id": "bw",
     "title": "Ч/Б Неко-Арк",
     "category": "Ручная графика",
-    "thumb": "assets/gallery/thumb_art_neco_bw.jpg",
-    "file": "assets/gallery/view_art_neco_bw.jpg",
+    "thumb": "assets/gallery/thumb_bw.jpg",
+    "file": "assets/gallery/view_bw.jpg",
+    "watermark": "Защищено паттерном «47R»"
+  },
+  {
+    "id": "gun1",
+    "title": "Neco-Arc с пушкой",
+    "category": "Оружие / Скетч",
+    "thumb": "assets/gallery/thumb_gun1.jpg",
+    "file": "assets/gallery/view_gun1.jpg",
+    "watermark": "Защищено паттерном «47R»"
+  },
+  {
+    "id": "hammer",
+    "title": "Neco-Arc с молотом",
+    "category": "Арт / Оружие",
+    "thumb": "assets/gallery/thumb_hammer.jpg",
+    "file": "assets/gallery/view_hammer.jpg",
+    "watermark": "Защищено паттерном «47R»"
+  },
+  {
+    "id": "agr_sketch",
+    "title": "Neco-Arc Rage + Скетч",
+    "category": "Концепт / Скетч",
+    "thumb": "assets/gallery/thumb_agr_sketch.jpg",
+    "file": "assets/gallery/view_agr_sketch.jpg",
     "watermark": "Защищено паттерном «47R»"
   }
 ]
