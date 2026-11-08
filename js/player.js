@@ -1,7 +1,7 @@
 /**
  * 47OS CD-Player & Winamp Audio Manager
  * Uses YouTube IFrame API for "Great Cat's Village R (Jazz Remix)"
- * Triggers Neco Arc intervention when paused.
+ * Controls timer strictly based on YouTube player state.
  */
 
 class AudioPlayer {
@@ -15,6 +15,7 @@ class AudioPlayer {
     this.volumeSlider = document.getElementById('player-volume');
     
     this.ytPlayer = null;
+    this.isReady = false;
     this.isPlaying = false;
     this.timerInterval = null;
     this.secondsElapsed = 0;
@@ -38,8 +39,7 @@ class AudioPlayer {
     
     this.btnPause.addEventListener('click', () => {
       this.pause();
-      // Neco intervention!
-      if (window.necoPet) {
+      if (window.necoPet && typeof window.necoPet.enforceMusic === 'function') {
         window.necoPet.enforceMusic(this.playerWindowEl, () => this.play());
       }
     });
@@ -48,7 +48,7 @@ class AudioPlayer {
       this.pause();
       this.secondsElapsed = 0;
       this.updateTimeDisplay();
-      if (window.necoPet) {
+      if (window.necoPet && typeof window.necoPet.enforceMusic === 'function') {
         window.necoPet.enforceMusic(this.playerWindowEl, () => this.play());
       }
     });
@@ -86,12 +86,14 @@ class AudioPlayer {
       },
       events: {
         'onReady': () => {
+          this.isReady = true;
           this.ytPlayer.setVolume(this.volume);
         },
         'onStateChange': (e) => {
           if (e.data === YT.PlayerState.PLAYING) {
             this.isPlaying = true;
             this.startTimer();
+            this.lcdTitle.textContent = "1. Great Cat's Village R || Jazz Remix";
           } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
             this.isPlaying = false;
             this.stopTimer();
@@ -104,10 +106,16 @@ class AudioPlayer {
   play() {
     if (this.ytPlayer && typeof this.ytPlayer.playVideo === 'function') {
       this.ytPlayer.playVideo();
+    } else {
+      // Retry once ready
+      const checkReady = setInterval(() => {
+        if (this.ytPlayer && typeof this.ytPlayer.playVideo === 'function') {
+          clearInterval(checkReady);
+          this.ytPlayer.playVideo();
+        }
+      }, 300);
+      setTimeout(() => clearInterval(checkReady), 4000);
     }
-    this.isPlaying = true;
-    this.startTimer();
-    this.lcdTitle.textContent = "1. Great Cat's Village R (Neco-Arc Theme) || Jazz Remix";
   }
 
   pause() {

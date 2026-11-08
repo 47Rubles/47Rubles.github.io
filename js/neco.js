@@ -486,6 +486,9 @@ class NecoPet {
 
       this.speak("СЕЙЧАС ВКЛЮЧУ ОБРАТНО!", 2200);
 
+      // Release busy flag so navigation can proceed!
+      this.isBusy = false;
+
       if (Math.hypot(targetX - this.x, targetY - this.y) > 350) {
         this.digTeleport(targetX + 50, targetY, () => {
           this.walkTo(targetX, targetY, 6, () => this.hitPlay(onPlayResume));
@@ -516,7 +519,14 @@ class NecoPet {
       this.setState('idle');
       this.isBusy = false;
     });
-    this.speak("ТЫ КУДА МОИ ЗАПАСЫ ПИЛКА ВЫКИНУЛ?! ВЕРНИ ОБРАТНО!", 3500);
+
+    const trashQuotes = [
+      "КУДА ЛАПЫ ТЯНЕМ? НЕЛЬЗЯ!",
+      "НЕ ДАМ! ЛАПЫ ПРОЧЬ!",
+      "НЕ УДАЛЯТЬ!"
+    ];
+    const picked = trashQuotes[Math.floor(Math.random() * trashQuotes.length)];
+    this.speak(picked, 3500);
   }
 }
 

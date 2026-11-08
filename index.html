@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>47OS 98 — Персональная система 47Rubles</title>
-  <!-- Authentic PC monitor viewport for mobile -->
   <meta name="viewport" content="width=1024, user-scalable=yes, initial-scale=0.38">
   <link rel="stylesheet" href="css/win98.css">
   <link rel="stylesheet" href="css/style.css">
@@ -43,104 +42,113 @@
 
   <!-- Desktop Area -->
   <main id="desktop">
-    <!-- Desktop Icon 1: Dialogue -->
-    <div class="desktop-icon" id="icon-dialogue" onclick="window.winManager.openWindow('win-dialogue')">
-      <svg viewBox="0 0 32 32" fill="none">
-        <rect x="6" y="2" width="20" height="28" fill="#fff" stroke="#000" stroke-width="2"/>
-        <line x1="10" y1="8" x2="22" y2="8" stroke="#000" stroke-width="2"/>
-        <line x1="10" y1="13" x2="22" y2="13" stroke="#000" stroke-width="2"/>
-        <line x1="10" y1="18" x2="22" y2="18" stroke="#000" stroke-width="2"/>
-        <line x1="10" y1="23" x2="18" y2="23" stroke="#000" stroke-width="2"/>
-        <circle cx="21" cy="22" r="3" fill="#ff0000"/>
-        <text x="20" y="24" fill="#fff" font-size="6" font-weight="bold">!</text>
-      </svg>
-      <div class="desktop-icon-label">НЕ_ОТКРЫВАТЬ!.txt</div>
+    <!-- Column 1: System & Core -->
+    <div class="desktop-column">
+      <!-- Icon: My Computer -->
+      <div class="desktop-icon" id="icon-computer" onclick="window.winManager.openWindow('win-computer')">
+        <svg viewBox="0 0 32 32">
+          <rect x="4" y="4" width="24" height="18" fill="#d4d0c8" stroke="#000" stroke-width="2"/>
+          <rect x="7" y="7" width="18" height="12" fill="#000080"/>
+          <polygon points="10,22 22,22 24,28 8,28" fill="#d4d0c8" stroke="#000" stroke-width="2"/>
+        </svg>
+        <div class="desktop-icon-label">Мой Компьютер</div>
+      </div>
+
+      <!-- Icon: Dialogue -->
+      <div class="desktop-icon" id="icon-dialogue" onclick="window.winManager.openWindow('win-dialogue')">
+        <svg viewBox="0 0 32 32" fill="none">
+          <rect x="6" y="2" width="20" height="28" fill="#fff" stroke="#000" stroke-width="2"/>
+          <line x1="10" y1="8" x2="22" y2="8" stroke="#000" stroke-width="2"/>
+          <line x1="10" y1="13" x2="22" y2="13" stroke="#000" stroke-width="2"/>
+          <line x1="10" y1="18" x2="22" y2="18" stroke="#000" stroke-width="2"/>
+          <line x1="10" y1="23" x2="18" y2="23" stroke="#000" stroke-width="2"/>
+          <circle cx="21" cy="22" r="3" fill="#ff0000"/>
+          <text x="20" y="24" fill="#fff" font-size="6" font-weight="bold">!</text>
+        </svg>
+        <div class="desktop-icon-label">НЕ_ОТКРЫВАТЬ!.txt</div>
+      </div>
+
+      <!-- Icon: Projects -->
+      <div class="desktop-icon" id="icon-projects" onclick="window.winManager.openWindow('win-projects')">
+        <svg viewBox="0 0 32 32">
+          <rect x="2" y="4" width="28" height="24" rx="2" fill="#305090" stroke="#000" stroke-width="2"/>
+          <rect x="6" y="4" width="16" height="10" fill="#fff"/>
+          <rect x="8" y="18" width="16" height="8" fill="#bbb" stroke="#000"/>
+          <rect x="18" y="19" width="4" height="6" fill="#444"/>
+        </svg>
+        <div class="desktop-icon-label">Проекты.exe</div>
+      </div>
+
+      <!-- Icon: Gallery -->
+      <div class="desktop-icon" id="icon-gallery" onclick="window.winManager.openWindow('win-gallery')">
+        <svg viewBox="0 0 32 32">
+          <rect x="2" y="6" width="28" height="22" fill="#fff" stroke="#000" stroke-width="2"/>
+          <rect x="4" y="8" width="24" height="18" fill="#e0e0ff"/>
+          <polygon points="6,24 13,15 19,21 21,18 26,24" fill="#50a050"/>
+          <circle cx="21" cy="12" r="2.5" fill="#e0a000"/>
+        </svg>
+        <div class="desktop-icon-label">Галерея_47R</div>
+      </div>
     </div>
 
-    <!-- Desktop Icon 2: Gallery -->
-    <div class="desktop-icon" id="icon-gallery" onclick="window.winManager.openWindow('win-gallery')">
-      <svg viewBox="0 0 32 32">
-        <rect x="2" y="6" width="28" height="22" fill="#fff" stroke="#000" stroke-width="2"/>
-        <rect x="4" y="8" width="24" height="18" fill="#e0e0ff"/>
-        <polygon points="6,24 13,15 19,21 21,18 26,24" fill="#50a050"/>
-        <circle cx="21" cy="12" r="2.5" fill="#e0a000"/>
-      </svg>
-      <div class="desktop-icon-label">Галерея_47R</div>
+    <!-- Column 2: Media & Interactive -->
+    <div class="desktop-column">
+      <!-- Icon: CD Player -->
+      <div class="desktop-icon" id="icon-player" onclick="window.winManager.openWindow('win-player')">
+        <svg viewBox="0 0 32 32">
+          <circle cx="16" cy="16" r="13" fill="#d0d4dc" stroke="#000" stroke-width="2"/>
+          <circle cx="16" cy="16" r="5" fill="#fff" stroke="#000"/>
+          <circle cx="16" cy="16" r="2" fill="#222"/>
+          <path d="M12,8 A10,10 0 0,1 24,14" stroke="#ff88aa" stroke-width="1.5" fill="none"/>
+        </svg>
+        <div class="desktop-icon-label">CD_Плеер</div>
+      </div>
+
+      <!-- Icon: Guestbook -->
+      <div class="desktop-icon" id="icon-guestbook" onclick="window.winManager.openWindow('win-guestbook')">
+        <svg viewBox="0 0 32 32">
+          <rect x="4" y="4" width="24" height="24" fill="#ffffd0" stroke="#000" stroke-width="2"/>
+          <line x1="8" y1="10" x2="24" y2="10" stroke="#008000" stroke-width="2"/>
+          <line x1="8" y1="15" x2="24" y2="15" stroke="#444" stroke-width="1.5"/>
+          <line x1="8" y1="19" x2="24" y2="19" stroke="#444" stroke-width="1.5"/>
+          <line x1="8" y1="23" x2="18" y2="23" stroke="#444" stroke-width="1.5"/>
+        </svg>
+        <div class="desktop-icon-label">Лог_нарушителей</div>
+      </div>
+
+      <!-- Icon: Rate / Star -->
+      <div class="desktop-icon" id="icon-star" onclick="window.starManager.openModal()">
+        <svg viewBox="0 0 32 32" id="desktop-star-svg">
+          <polygon points="16,2 20.5,11.5 31,13 23.5,20.5 25.5,31 16,26 6.5,31 8.5,20.5 1,13 11.5,11.5" 
+                   fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,2"/>
+        </svg>
+        <div class="desktop-icon-label">Оценить_47OS</div>
+      </div>
     </div>
 
-    <!-- Desktop Icon 3: Projects -->
-    <div class="desktop-icon" id="icon-projects" onclick="window.winManager.openWindow('win-projects')">
-      <svg viewBox="0 0 32 32">
-        <rect x="2" y="4" width="28" height="24" rx="2" fill="#305090" stroke="#000" stroke-width="2"/>
-        <rect x="6" y="4" width="16" height="10" fill="#fff"/>
-        <rect x="8" y="18" width="16" height="8" fill="#bbb" stroke="#000"/>
-        <rect x="18" y="19" width="4" height="6" fill="#444"/>
-      </svg>
-      <div class="desktop-icon-label">Проекты.exe</div>
-    </div>
+    <!-- Column 3 (Right edge): Trash & GitHub -->
+    <div class="desktop-column desktop-right">
+      <!-- Icon: Recycle Bin -->
+      <div class="desktop-icon" id="icon-trash" onclick="window.winManager.openWindow('win-trash')">
+        <svg viewBox="0 0 32 32">
+          <polygon points="7,8 25,8 22,28 10,28" fill="#d0d0d0" stroke="#000" stroke-width="2"/>
+          <line x1="5" y1="6" x2="27" y2="6" stroke="#000" stroke-width="2"/>
+          <rect x="12" y="3" width="8" height="3" fill="#bbb" stroke="#000" stroke-width="1.5"/>
+          <line x1="12" y1="12" x2="12" y2="24" stroke="#888" stroke-width="1.5"/>
+          <line x1="16" y1="12" x2="16" y2="24" stroke="#888" stroke-width="1.5"/>
+          <line x1="20" y1="12" x2="20" y2="24" stroke="#888" stroke-width="1.5"/>
+        </svg>
+        <div class="desktop-icon-label">Корзина</div>
+      </div>
 
-    <!-- Desktop Icon 4: CD Player -->
-    <div class="desktop-icon" id="icon-player" onclick="window.winManager.openWindow('win-player')">
-      <svg viewBox="0 0 32 32">
-        <circle cx="16" cy="16" r="13" fill="#d0d4dc" stroke="#000" stroke-width="2"/>
-        <circle cx="16" cy="16" r="5" fill="#fff" stroke="#000"/>
-        <circle cx="16" cy="16" r="2" fill="#222"/>
-        <path d="M12,8 A10,10 0 0,1 24,14" stroke="#ff88aa" stroke-width="1.5" fill="none"/>
-      </svg>
-      <div class="desktop-icon-label">CD_Плеер</div>
-    </div>
-
-    <!-- Desktop Icon 5: My Computer -->
-    <div class="desktop-icon" id="icon-computer" onclick="window.winManager.openWindow('win-computer')">
-      <svg viewBox="0 0 32 32">
-        <rect x="4" y="4" width="24" height="18" fill="#d4d0c8" stroke="#000" stroke-width="2"/>
-        <rect x="7" y="7" width="18" height="12" fill="#000080"/>
-        <polygon points="10,22 22,22 24,28 8,28" fill="#d4d0c8" stroke="#000" stroke-width="2"/>
-      </svg>
-      <div class="desktop-icon-label">Мой Компьютер</div>
-    </div>
-
-    <!-- Desktop Icon 6: Guestbook -->
-    <div class="desktop-icon" id="icon-guestbook" onclick="window.winManager.openWindow('win-guestbook')">
-      <svg viewBox="0 0 32 32">
-        <rect x="4" y="4" width="24" height="24" fill="#ffffd0" stroke="#000" stroke-width="2"/>
-        <line x1="8" y1="10" x2="24" y2="10" stroke="#008000" stroke-width="2"/>
-        <line x1="8" y1="15" x2="24" y2="15" stroke="#444" stroke-width="1.5"/>
-        <line x1="8" y1="19" x2="24" y2="19" stroke="#444" stroke-width="1.5"/>
-        <line x1="8" y1="23" x2="18" y2="23" stroke="#444" stroke-width="1.5"/>
-      </svg>
-      <div class="desktop-icon-label">Лог_нарушителей</div>
-    </div>
-
-    <!-- Desktop Icon 7: Recycle Bin -->
-    <div class="desktop-icon" id="icon-trash" onclick="window.winManager.openWindow('win-trash')">
-      <svg viewBox="0 0 32 32">
-        <polygon points="7,8 25,8 22,28 10,28" fill="#d0d0d0" stroke="#000" stroke-width="2"/>
-        <line x1="5" y1="6" x2="27" y2="6" stroke="#000" stroke-width="2"/>
-        <rect x="12" y="3" width="8" height="3" fill="#bbb" stroke="#000" stroke-width="1.5"/>
-        <line x1="12" y1="12" x2="12" y2="24" stroke="#888" stroke-width="1.5"/>
-        <line x1="16" y1="12" x2="16" y2="24" stroke="#888" stroke-width="1.5"/>
-        <line x1="20" y1="12" x2="20" y2="24" stroke="#888" stroke-width="1.5"/>
-      </svg>
-      <div class="desktop-icon-label">Корзина</div>
-    </div>
-
-    <!-- Desktop Icon 8: GitHub Link -->
-    <div class="desktop-icon" id="icon-github" onclick="window.open('https://github.com/47Rubles', '_blank')">
-      <svg viewBox="0 0 32 32">
-        <rect x="2" y="2" width="28" height="28" rx="4" fill="#24292e" stroke="#000" stroke-width="2"/>
-        <path d="M16 6C10.5 6 6 10.5 6 16c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .9-.3 2.8 1.1.8-.2 1.7-.4 2.6-.4.9 0 1.8.2 2.6.4 1.9-1.4 2.8-1.1 2.8-1.1.5 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C26 10.5 21.5 6 16 6z" fill="#fff"/>
-      </svg>
-      <div class="desktop-icon-label">GitHub.url</div>
-    </div>
-
-    <!-- Desktop Icon 9: Rate / Star -->
-    <div class="desktop-icon" id="icon-star" onclick="window.starManager.openModal()">
-      <svg viewBox="0 0 32 32" id="desktop-star-svg">
-        <polygon points="16,2 20.5,11.5 31,13 23.5,20.5 25.5,31 16,26 6.5,31 8.5,20.5 1,13 11.5,11.5" 
-                 fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="3,2"/>
-      </svg>
-      <div class="desktop-icon-label">Оценить_47OS</div>
+      <!-- Icon: GitHub Link -->
+      <div class="desktop-icon" id="icon-github" onclick="window.open('https://github.com/47Rubles', '_blank')">
+        <svg viewBox="0 0 32 32">
+          <rect x="2" y="2" width="28" height="28" rx="4" fill="#24292e" stroke="#000" stroke-width="2"/>
+          <path d="M16 6C10.5 6 6 10.5 6 16c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .9-.3 2.8 1.1.8-.2 1.7-.4 2.6-.4.9 0 1.8.2 2.6.4 1.9-1.4 2.8-1.1 2.8-1.1.5 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 4-1.3 6.8-5.1 6.8-9.5C26 10.5 21.5 6 16 6z" fill="#fff"/>
+        </svg>
+        <div class="desktop-icon-label">GitHub.url</div>
+      </div>
     </div>
   </main>
 
@@ -381,7 +389,7 @@
   </div>
 
   <!-- Window 8: Recycle Bin -->
-  <div class="window" id="win-trash" style="top: 180px; left: 300px; width: 380px; display: none;">
+  <div class="window" id="win-trash" style="top: 180px; left: 300px; width: 390px; display: none;">
     <div class="title-bar">
       <div class="title-bar-text">
         <span>🗑</span> Корзина
@@ -394,7 +402,9 @@
       <div style="font-size: 11px; margin-bottom: 8px;">
         Содержимое корзины:
       </div>
-      <div style="background: #fff; border: 1px inset #808080; padding: 8px; height: 110px; overflow-y: auto; font-size: 11px; line-height: 1.6;">
+      <div style="background: #fff; border: 1px inset #808080; padding: 8px; height: 130px; overflow-y: auto; font-size: 11px; line-height: 1.7;">
+        🔑 LLM_API_KEY.txt<br>
+        👾 Not_a_virus.exe<br>
         🥛 Пустая банка из-под Pilk (молоко + пепси)<br>
         📄 Черновики парсера AST v0.1<br>
         💀 Неудачные генерации цитат<br>
@@ -408,7 +418,7 @@
   </div>
 
   <!-- Window 9: Star Rating Modal -->
-  <div class="window" id="win-star" style="top: 170px; left: 280px; width: 360px; display: none; z-index: 5000;">
+  <div class="window" id="win-star" style="top: 170px; left: 280px; width: 380px; display: none; z-index: 5000;">
     <div class="title-bar">
       <div class="title-bar-text">
         <span>★</span> Оценить 47OS 98
@@ -438,6 +448,9 @@
       </div>
       <div class="start-item" onclick="window.winManager.openWindow('win-guestbook'); document.getElementById('start-menu').style.display='none';">
         <span>📋</span> <span>Лог нарушителей</span>
+      </div>
+      <div class="start-item" onclick="window.starManager.openModal(); document.getElementById('start-menu').style.display='none';">
+        <span>★</span> <span>Оценить 47OS</span>
       </div>
       <div class="start-divider"></div>
       <div class="start-item" onclick="window.open('https://github.com/47Rubles', '_blank'); document.getElementById('start-menu').style.display='none';">
@@ -483,7 +496,6 @@
   <script src="js/boot.js"></script>
 
   <script>
-    // Clock updater
     function updateClock() {
       const now = new Date();
       const clockEl = document.getElementById('taskbar-clock');
