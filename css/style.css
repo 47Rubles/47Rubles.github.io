@@ -233,80 +233,101 @@
   height: 100%;
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.9));
+  opacity: 0.82;
+  filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.85));
   pointer-events: none;
 }
 
-/* Glowing Cat Eyes */
+/* Authentic Big Oval Neco Arc Eyes */
 .wallpaper-eyes {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 5;
 }
 
 .wallpaper-eye {
   position: absolute;
-  width: 3.5%;
-  height: 4.4%;
-  background: radial-gradient(circle at 45% 40%, #ffffff 0%, #ff2255 45%, #aa0022 100%);
-  border-radius: 50% 50% 46% 46%;
+  background: #ffffff;
+  border: 3px solid #141414;
+  border-radius: 50% 50% 48% 48% / 55% 55% 45% 45%;
   box-shadow: 
-    0 0 10px #ff2255,
-    0 0 24px rgba(255, 34, 85, 0.85),
-    inset 0 0 4px #ffffff;
+    0 0 15px rgba(255, 255, 255, 0.45),
+    inset 0 0 5px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   transform-origin: center;
   transition: transform 0.08s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  z-index: 6;
 }
 
 .wallpaper-eye.eye-left {
-  left: 40.8%;
-  top: 36.2%;
-  transform: rotate(-3deg);
+  left: 39.0%;
+  top: 29.4%;
+  width: 9.8%;
+  height: 13.8%;
+  transform: rotate(-1.5deg);
 }
 
 .wallpaper-eye.eye-right {
-  left: 51.0%;
-  top: 36.2%;
-  transform: rotate(3deg);
+  left: 49.0%;
+  top: 29.4%;
+  width: 10.4%;
+  height: 13.8%;
+  transform: rotate(1.5deg);
 }
 
 .wallpaper-pupil {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 30%;
-  height: 70%;
-  background: #1a0005;
-  border-radius: 50%;
+  width: 44%;
+  height: 82%;
+  background: radial-gradient(ellipse at 42% 35%, #eb001e 0%, #aa0015 60%, #4a0006 100%);
+  border: 2px solid #220004;
+  border-radius: 50% / 40% 40% 60% 60%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 10px rgba(235, 0, 30, 0.7);
   transition: transform 0.05s linear;
+}
+
+.wallpaper-pupil::after {
+  content: '';
+  position: absolute;
+  top: 18%;
+  left: 22%;
+  width: 24%;
+  height: 24%;
+  background: #ffffff;
+  border-radius: 50%;
+  opacity: 0.9;
+  box-shadow: 0 0 2px #ffffff;
 }
 
 /* Blinking state */
 .wallpaper-eyes.blinking .wallpaper-eye {
-  transform: scaleY(0.08);
-  filter: brightness(2);
+  transform: scaleY(0.06);
+  filter: brightness(1.8);
 }
 
 /* Narrowing / Menacing state */
 .wallpaper-eyes.menacing .wallpaper-eye {
-  transform: scaleY(0.4) scaleX(1.15);
-  box-shadow: 0 0 18px #ff0033, 0 0 35px #ff0055, inset 0 0 4px #ffffaa;
+  transform: scaleY(0.35) scaleX(1.1);
+  box-shadow: 0 0 22px #ff0033, 0 0 40px #ff0055, inset 0 0 6px #ffaaaa;
 }
 
 /* Music Pulsing */
-#desktop-wallpaper.is-playing .wallpaper-eye {
-  animation: eyeMusicPulse 1.2s ease-in-out infinite alternate;
+#desktop-wallpaper.is-playing .wallpaper-pupil {
+  animation: pupilMusicPulse 1.1s ease-in-out infinite alternate;
 }
 
-@keyframes eyeMusicPulse {
+@keyframes pupilMusicPulse {
   0% {
-    box-shadow: 0 0 10px #ff2255, 0 0 20px rgba(255, 34, 85, 0.7);
+    box-shadow: 0 0 10px rgba(235, 0, 30, 0.7);
+    filter: brightness(1);
   }
   100% {
-    box-shadow: 0 0 20px #ff4477, 0 0 38px rgba(255, 50, 100, 1), 0 0 55px rgba(255, 0, 60, 0.6);
+    box-shadow: 0 0 22px rgba(255, 20, 60, 1), 0 0 35px rgba(255, 0, 80, 0.7);
+    filter: brightness(1.25);
   }
 }
 

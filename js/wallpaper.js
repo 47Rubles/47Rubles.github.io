@@ -88,8 +88,8 @@ class WallpaperManager {
     const dxL = e.clientX - this.eyeLeftCenter.x;
     const dyL = e.clientY - this.eyeLeftCenter.y;
     const distL = Math.hypot(dxL, dyL);
-    const maxOffset = 5; // max pupil offset in pixels
-    const moveL = Math.min(distL / 140, 1) * maxOffset;
+    const maxOffset = 9; // max pupil offset in pixels for large oval eyes
+    const moveL = Math.min(distL / 180, 1) * maxOffset;
     const angleL = Math.atan2(dyL, dxL);
     const oxL = Math.cos(angleL) * moveL;
     const oyL = Math.sin(angleL) * moveL;
@@ -98,7 +98,7 @@ class WallpaperManager {
     const dxR = e.clientX - this.eyeRightCenter.x;
     const dyR = e.clientY - this.eyeRightCenter.y;
     const distR = Math.hypot(dxR, dyR);
-    const moveR = Math.min(distR / 140, 1) * maxOffset;
+    const moveR = Math.min(distR / 180, 1) * maxOffset;
     const angleR = Math.atan2(dyR, dxR);
     const oxR = Math.cos(angleR) * moveR;
     const oyR = Math.sin(angleR) * moveR;

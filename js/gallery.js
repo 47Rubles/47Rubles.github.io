@@ -73,7 +73,7 @@ class GalleryManager {
     if (!this.viewerWinEl) return;
     this.viewerImgEl.src = item.file;
     this.viewerTitleEl.textContent = item.title;
-    this.viewerInfoEl.textContent = `${item.category} • Автор: 47Rubles`;
+    this.viewerInfoEl.textContent = `${item.category} • Автор: 47Rubles [Защищено знаком «47R»]`;
 
     if (window.winManager) {
       window.winManager.openWindow('win-image-viewer');
