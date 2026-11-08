@@ -1,7 +1,7 @@
 /**
  * 47OS Neco Arc Autonomous Daemon - Melty Blood Type Lumina Edition
- * Implements 47R's exact sprite map, parry block on clicks, real walk & lookback,
- * underground digging spawn, dances, phone animations, and hit sound effects.
+ * Fixes: Full image preloading, no frame skipping, correct lookback walking direction,
+ * flawless turn animation without premature flips, and uninterruptible actions.
  */
 
 class NecoPet {
@@ -15,27 +15,18 @@ class NecoPet {
     this.y = window.innerHeight - 128; // On taskbar
     this.targetX = this.x;
     this.targetY = this.y;
-    this.facing = -1; // -1 = left, 1 = right
+    this.facing = 1; // 1 = right, -1 = left
     this.currentState = 'idle';
     this.currentFrame = 0;
     this.frameTimer = null;
     this.moveInterval = null;
     this.isMoving = false;
+    this.isBusy = false;
     this.isEnforcingMusic = false;
-    this.isBlocking = false;
     this.idleCountdown = 15;
     
-    // Quotes
-    this.phrases = [
-      "Buru-nyuu~!",
-      "Парировано!",
-      "Блок!",
-      "Не попал!",
-      "47R тут главный, а я надзиратель.",
-      "Руки от курсора убрал!",
-      "Где мой пилк (Pilk)?!",
-      "Слушай джаз и не выпендривайся."
-    ];
+    // Preloaded image cache
+    this.imageCache = {};
     
     // Hit sounds list from 2100 to 2107 (a and b)
     this.hitSoundNames = [];
@@ -62,6 +53,7 @@ class NecoPet {
     try {
       const res = await fetch('assets/neco/manifest.json');
       this.manifest = await res.json();
+      this.preloadAllFrames();
     } catch (e) {
       console.warn("Could not load neco manifest:", e);
     }
@@ -78,7 +70,6 @@ class NecoPet {
       this.onParryHit();
     });
 
-    // Touch support for mobile
     this.el.addEventListener('touchstart', (e) => {
       e.stopPropagation();
       this.onParryHit();
@@ -92,15 +83,25 @@ class NecoPet {
       this.updatePosition();
     });
 
-    // Wandering loop
-    setInterval(() => this.behaviorLoop(), 4200);
+    // Wandering loop (checks every 3.5 seconds)
+    setInterval(() => this.behaviorLoop(), 3500);
     // Idle watcher
     setInterval(() => this.idleWatcher(), 1000);
   }
 
-  playSound(name) {
-    if (this.sounds && this.sounds[name]) {
-      this.playVoice(name);
+  preloadAllFrames() {
+    if (!this.manifest) return;
+    for (const animName in this.manifest) {
+      const anim = this.manifest[animName];
+      if (anim.frames) {
+        anim.frames.forEach(src => {
+          if (!this.imageCache[src]) {
+            const img = new Image();
+            img.src = src;
+            this.imageCache[src] = img;
+          }
+        });
+      }
     }
   }
 
@@ -111,10 +112,9 @@ class NecoPet {
       audio.volume = 0.22;
       audio.play().catch(() => {});
 
-      // Impact SFX
       if (this.sounds.block_sfx) {
         this.sounds.block_sfx.currentTime = 0;
-        this.sounds.block_sfx.volume = 0.20;
+        this.sounds.block_sfx.volume = 0.18;
         this.sounds.block_sfx.play().catch(() => {});
       }
     } catch (e) {}
@@ -131,6 +131,12 @@ class NecoPet {
     } catch (e) {}
   }
 
+  playSound(name) {
+    if (this.sounds[name]) {
+      this.playVoice(name);
+    }
+  }
+
   speak(text, duration = 2800) {
     if (!this.speechEl) return;
     this.speechEl.textContent = text;
@@ -141,35 +147,46 @@ class NecoPet {
     }, duration);
   }
 
+  /**
+   * Set state with robust frame cycling and callback when animation completes
+   */
   setState(stateName, onComplete = null) {
-    if (this.currentState === stateName && this.frameTimer) return;
+    if (this.currentState === stateName && this.frameTimer && !onComplete) return;
     this.currentState = stateName;
     this.currentFrame = 0;
 
+    clearInterval(this.frameTimer);
+
     if (!this.manifest || !this.manifest[stateName]) {
       this.imgEl.src = `assets/neco/${stateName}_0.png`;
+      if (onComplete) onComplete();
       return;
     }
 
     const anim = this.manifest[stateName];
-    clearInterval(this.frameTimer);
+    const totalFrames = anim.frames.length;
 
-    if (anim.frames && anim.frames.length > 0) {
-      this.imgEl.src = anim.frames[0];
+    if (totalFrames === 0) {
+      if (onComplete) onComplete();
+      return;
     }
 
+    // Immediately display frame 0
+    this.imgEl.src = anim.frames[0];
+
     this.frameTimer = setInterval(() => {
-      if (!anim.frames || anim.frames.length === 0) return;
       this.currentFrame++;
       
-      if (this.currentFrame >= anim.frames.length) {
+      if (this.currentFrame >= totalFrames) {
         if (onComplete) {
           clearInterval(this.frameTimer);
+          this.frameTimer = null;
           onComplete();
           return;
         }
         this.currentFrame = 0;
       }
+      
       this.imgEl.src = anim.frames[this.currentFrame];
     }, anim.speed || 85);
   }
@@ -177,42 +194,38 @@ class NecoPet {
   updatePosition() {
     this.el.style.left = `${this.x}px`;
     this.el.style.top = `${this.y}px`;
-    // Transform ONLY the img so the speech bubble is NEVER mirrored!
     if (this.imgEl) {
       this.imgEl.style.transform = `scaleX(${this.facing})`;
     }
   }
 
   spawnFromGround() {
-    this.isMoving = true;
+    this.isBusy = true;
     this.setState('spawn_ground', () => {
-      this.playVoice('bonjour', 0.3);
+      this.playVoice('bonjour', 0.28);
       this.speak("Бонжур!", 2500);
       this.setState('idle');
-      this.isMoving = false;
+      this.isBusy = false;
     });
   }
 
   onParryHit() {
     this.idleCountdown = 15;
     this.isMoving = false;
+    this.isBusy = true;
     clearInterval(this.moveInterval);
 
-    // Parry block animation
-    this.setState('parry');
+    this.setState('parry', () => {
+      this.setState('idle');
+      this.isBusy = false;
+    });
     this.playRandomHitSound();
 
     const parryQuotes = ["Парировано!", "Блок!", "Мимо!", "Ха! Слабо!", "Buru-nyuu~"];
     this.speak(parryQuotes[Math.floor(Math.random() * parryQuotes.length)], 1200);
-
-    setTimeout(() => {
-      if (this.currentState === 'parry') {
-        this.setState('idle');
-      }
-    }, 700);
   }
 
-  onMouseMove(e) {
+  onMouseMove() {
     this.idleCountdown = 15;
     if (this.currentState === 'lie_idle' || this.currentState === 'phone') {
       this.wakeUp();
@@ -220,9 +233,11 @@ class NecoPet {
   }
 
   wakeUp() {
+    this.isBusy = true;
     this.playVoice('arigato', 0.25);
     this.setState('happy_wave', () => {
       this.setState('idle');
+      this.isBusy = false;
     });
   }
 
@@ -233,15 +248,29 @@ class NecoPet {
     this.isMoving = true;
     this.targetX = targetX;
     this.targetY = targetY;
-    this.facing = targetX > this.x ? 1 : -1;
-    this.updatePosition();
 
-    // Pick animation: dash if fast, lookback walk or normal walk
+    const movingRight = targetX > this.x;
+
+    // Pick animation
     if (speed > 4) {
+      // Dash
+      this.facing = movingRight ? 1 : -1;
+      this.updatePosition();
       this.setState('dash');
     } else {
       const useLookback = Math.random() < 0.35;
-      this.setState(useLookback ? 'walk_lookback' : 'walk');
+      if (useLookback) {
+        // In 702-713 (walk looking back):
+        // Raw sprite moves opposite to gaze. To walk forward while looking behind:
+        this.facing = movingRight ? -1 : 1;
+        this.updatePosition();
+        this.setState('walk_lookback');
+      } else {
+        // Normal walk 690-701:
+        this.facing = movingRight ? 1 : -1;
+        this.updatePosition();
+        this.setState('walk');
+      }
     }
 
     clearInterval(this.moveInterval);
@@ -256,6 +285,9 @@ class NecoPet {
         this.updatePosition();
         clearInterval(this.moveInterval);
         this.isMoving = false;
+        // Face the forward direction upon stopping
+        this.facing = movingRight ? 1 : -1;
+        this.updatePosition();
         this.setState('idle');
         if (onArrival) onArrival();
         return;
@@ -268,10 +300,30 @@ class NecoPet {
   }
 
   /**
+   * Turn animation (741-748):
+   * Plays the complete turn animation first, and only updates this.facing upon completion!
+   */
+  turnAround(onComplete = null) {
+    if (this.isBusy || this.isMoving) return;
+    this.isBusy = true;
+
+    // Play turn animation without pre-flipping facing
+    this.setState('turn', () => {
+      // At the end of the turn, flip facing!
+      this.facing = this.facing * -1;
+      this.updatePosition();
+      this.setState('idle');
+      this.isBusy = false;
+      if (onComplete) onComplete();
+    });
+  }
+
+  /**
    * Digs into ground -> Teleport glitch -> Digs out at destination
    */
   digTeleport(targetX, targetY, onComplete = null) {
-    if (this.isMoving) return;
+    if (this.isBusy || this.isMoving) return;
+    this.isBusy = true;
     this.isMoving = true;
     clearInterval(this.moveInterval);
 
@@ -287,15 +339,16 @@ class NecoPet {
         this.setState('dig_out', () => {
           this.setState('idle');
           this.isMoving = false;
+          this.isBusy = false;
           if (onComplete) onComplete();
         });
-      }, 150);
+      }, 140);
     });
   }
 
   behaviorLoop() {
-    if (this.isMoving || this.isEnforcingMusic || this.isBlocking || 
-        ['parry', 'stomp', 'spawn_ground', 'dig_in', 'dig_out'].includes(this.currentState)) {
+    // Never interrupt any active movement or busy action!
+    if (this.isBusy || this.isMoving || this.isEnforcingMusic) {
       return;
     }
 
@@ -309,32 +362,32 @@ class NecoPet {
       const targetY = Math.max(20, activeBounds.top - 70);
       this.digTeleport(targetX, targetY);
     } else if (action < 0.50) {
-      // Walk on surface
+      // Walk on surface (ensure minimum distance of 140px so full walk cycles play smoothly!)
       const minX = 40;
       const maxX = window.innerWidth - 120;
-      const targetX = Math.floor(Math.random() * (maxX - minX)) + minX;
+      let targetX = Math.floor(Math.random() * (maxX - minX)) + minX;
+      if (Math.abs(targetX - this.x) < 140) {
+        targetX = this.x > (window.innerWidth / 2) ? this.x - 180 : this.x + 180;
+      }
       this.walkTo(targetX, this.y, 2.5);
     } else if (action < 0.65) {
       // Teleport across screen or drop back down to taskbar
       const targetY = (this.y < floorY - 30) ? floorY : this.y;
       const targetX = Math.floor(Math.random() * (window.innerWidth - 160)) + 40;
       this.digTeleport(targetX, targetY);
-    } else if (action < 0.78) {
-      // Turn around
-      this.facing = this.facing * -1;
-      this.updatePosition();
-      this.setState('turn', () => {
-        if (!this.isMoving) this.setState('idle');
-      });
-    } else if (action < 0.88) {
-      // Fun mini-action: Dance or Epic pose!
+    } else if (action < 0.80) {
+      // Smooth Turn around
+      this.turnAround();
+    } else if (action < 0.92) {
+      // Play a fun complete animation
+      this.isBusy = true;
       const randAct = Math.random();
       if (randAct < 0.35) {
-        this.setState('dance1', () => this.setState('idle'));
+        this.setState('dance1', () => { this.setState('idle'); this.isBusy = false; });
       } else if (randAct < 0.70) {
-        this.setState('epic', () => this.setState('idle'));
+        this.setState('epic', () => { this.setState('idle'); this.isBusy = false; });
       } else {
-        this.setState('laugh', () => this.setState('idle'));
+        this.setState('laugh', () => { this.setState('idle'); this.isBusy = false; });
       }
     } else {
       this.setState('idle');
@@ -343,8 +396,8 @@ class NecoPet {
 
   idleWatcher() {
     this.idleCountdown--;
-    if (this.idleCountdown <= 0 && this.currentState === 'idle' && !this.isMoving && !this.isEnforcingMusic) {
-      // Relax: either look at phone or lie down and kick legs!
+    if (this.idleCountdown <= 0 && this.currentState === 'idle' && !this.isMoving && !this.isBusy && !this.isEnforcingMusic) {
+      this.isBusy = true;
       if (Math.random() < 0.5) {
         this.setState('phone');
       } else {
@@ -356,6 +409,7 @@ class NecoPet {
   enforceMusic(playerWindowEl, onPlayResume) {
     if (this.isEnforcingMusic) return;
     this.isEnforcingMusic = true;
+    this.isBusy = true;
     clearInterval(this.moveInterval);
     this.isMoving = false;
 
@@ -368,7 +422,6 @@ class NecoPet {
 
       this.speak("СЕЙЧАС ВКЛЮЧУ ОБРАТНО!", 2200);
 
-      // Dash or dig-teleport to player!
       if (Math.hypot(targetX - this.x, targetY - this.y) > 350) {
         this.digTeleport(targetX + 50, targetY, () => {
           this.walkTo(targetX, targetY, 6, () => this.hitPlay(onPlayResume));
@@ -386,6 +439,7 @@ class NecoPet {
       onPlayResume();
       this.speak("Так-то лучше. Слушай джаз.", 2500);
       this.isEnforcingMusic = false;
+      this.isBusy = false;
       setTimeout(() => {
         this.walkTo(this.x, window.innerHeight - 128, 3);
       }, 1500);
@@ -393,8 +447,10 @@ class NecoPet {
   }
 
   reactToEmptyTrash() {
+    this.isBusy = true;
     this.setState('stomp', () => {
       this.setState('idle');
+      this.isBusy = false;
     });
     this.speak("ТЫ КУДА МОИ ЗАПАСЫ ПИЛКА ВЫКИНУЛ?! ВЕРНИ ОБРАТНО!", 3500);
   }

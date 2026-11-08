@@ -66,12 +66,6 @@ class BootManager {
       this.bootLog.textContent += "\n>> SYSTEM KERNEL LOADED. STARTING GRAPHICAL SUBSYSTEM...";
     }
 
-    try {
-      if (window.necoPet && typeof window.necoPet.playVoice === 'function') {
-        window.necoPet.playVoice('bonjour', 0.2);
-      }
-    } catch (e) {}
-
     setTimeout(() => {
       // Trigger CRT Screen Glitch
       document.body.classList.add('screen-glitch');
