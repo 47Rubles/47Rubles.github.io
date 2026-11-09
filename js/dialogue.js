@@ -20,7 +20,7 @@ class DialogueManager {
 
     // URL шлюза Cloudflare Worker для отправки сообщений без открытия вкладок.
     // Если URL не указан, форма использует стандартную кнопку-ссылку на GitHub Issue.
-    this.gatewayUrl = '';
+    this.gatewayUrl = 'https://47rubles-github-io.tchulkoff-ev.workers.dev/api';
 
     // Narrative scripts
     this.scriptBefore = [
