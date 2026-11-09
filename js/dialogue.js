@@ -211,13 +211,16 @@ class DialogueManager {
             `;
             setTimeout(() => this.loadGuestbookEntries(), 800);
           } else {
-            throw new Error(`Статус шлюза: ${resp.status}`);
+            const errData = await resp.json().catch(() => ({}));
+            const errReason = errData.error || errData.details || `Код ошибки HTTP ${resp.status}`;
+            throw new Error(errReason);
           }
         } catch (err) {
-          console.warn("Шлюз недоступен, открываем резервный вариант:", err);
+          console.warn("Шлюз вернул ошибку:", err);
           publishContainer.innerHTML = `
             <div style="margin-top: 8px; padding: 6px; background: #ffffd0; border: 1px inset #808080; font-size: 11px;">
-              <div style="margin-bottom: 6px;">Запись сохранена локально. Шлюз офлайн, отправить вручную через GitHub?</div>
+              <div style="margin-bottom: 4px; color: #b71c1c;"><strong>⚠ ${err.message || 'Шлюз недоступен'}</strong></div>
+              <div style="margin-bottom: 6px;">Запись сохранена локально. Ты можешь отправить её в лог вручную через GitHub:</div>
               <div style="display: flex; gap: 6px;">
                 <a href="${ghIssueUrl}" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
                   <span>↗</span> Открыть форму Issue на GitHub
