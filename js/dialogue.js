@@ -204,12 +204,13 @@ class DialogueManager {
 
           if (resp.ok) {
             const data = await resp.json();
+            const assignedAuthor = data.entry?.author || `Нарушитель #${data.entry?.id || ''}`;
             publishContainer.innerHTML = `
               <div style="margin-top: 8px; padding: 6px; background: #e8f8e8; border: 1px inset #2e7d32; font-size: 11px; color: #1b5e20;">
-                <strong>✔ Запись #${data.issue_number} успешно принята и занесена в реестр!</strong>
+                <strong>✔ Запись принята! Тебе присвоен статус: ${assignedAuthor}</strong>
               </div>
             `;
-            setTimeout(() => this.loadGuestbookEntries(), 800);
+            setTimeout(() => this.loadGuestbookEntries(), 500);
           } else {
             const errData = await resp.json().catch(() => ({}));
             const errReason = errData.error || errData.details || `Код ошибки HTTP ${resp.status}`;
@@ -220,12 +221,7 @@ class DialogueManager {
           publishContainer.innerHTML = `
             <div style="margin-top: 8px; padding: 6px; background: #ffffd0; border: 1px inset #808080; font-size: 11px;">
               <div style="margin-bottom: 4px; color: #b71c1c;"><strong>⚠ ${err.message || 'Шлюз недоступен'}</strong></div>
-              <div style="margin-bottom: 6px;">Запись сохранена локально. Ты можешь отправить её в лог вручную через GitHub:</div>
-              <div style="display: flex; gap: 6px;">
-                <a href="${ghIssueUrl}" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
-                  <span>↗</span> Открыть форму Issue на GitHub
-                </a>
-              </div>
+              <div style="margin-bottom: 6px;">Запись сохранена локально в буфере системы.</div>
             </div>
           `;
         }
@@ -252,43 +248,25 @@ class DialogueManager {
   async loadGuestbookEntries() {
     let localEntries = JSON.parse(localStorage.getItem('47r_messages') || '[]');
 
-    try {
-      const res = await fetch('https://api.github.com/repos/47Rubles/47Rubles.github.io/issues?state=all&per_page=50');
-      if (res.ok) {
-        const issues = await res.json();
-        const ghEntries = issues.map(iss => ({
-          text: iss.body || iss.title,
-          author: iss.user?.login || 'Гость',
-          date: new Date(iss.created_at).toLocaleString('ru-RU')
-        }));
-
-        // Deduplication: if message is already in GitHub, remove it from local cache!
-        const ghTexts = new Set(ghEntries.map(e => (e.text || '').trim().toLowerCase()));
-        localEntries = localEntries.filter(loc => {
-          const key = (loc.text || '').trim().toLowerCase();
-          return key && !ghTexts.has(key);
-        });
-
-        // Deduplicate local entries among themselves
-        const seenLocal = new Set();
-        localEntries = localEntries.filter(loc => {
-          const key = (loc.text || '').trim().toLowerCase();
-          if (seenLocal.has(key)) return false;
-          seenLocal.add(key);
-          return true;
-        });
-
-        // Save cleaned local entries back to storage
-        localStorage.setItem('47r_messages', JSON.stringify(localEntries));
-
-        this.renderGuestbookList([...ghEntries, ...localEntries]);
-        return;
+    if (this.gatewayUrl) {
+      try {
+        const res = await fetch(this.gatewayUrl, { cache: 'no-store' });
+        if (res.ok) {
+          const dbEntries = await res.json();
+          if (Array.isArray(dbEntries) && dbEntries.length > 0) {
+            // Исключаем дубли между базой и локальным буфером
+            const dbTexts = new Set(dbEntries.map(e => (e.text || '').trim().toLowerCase()));
+            localEntries = localEntries.filter(loc => !dbTexts.has((loc.text || '').trim().toLowerCase()));
+            this.renderGuestbookList([...dbEntries, ...localEntries]);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Не удалось загрузить записи из базы данных:", e);
       }
-    } catch (e) {
-      console.warn("Could not fetch GitHub Issues:", e);
     }
 
-    // Fallback if offline
+    // Резервный режим (если база недоступна)
     const seenLocal = new Set();
     localEntries = localEntries.filter(loc => {
       const key = (loc.text || '').trim().toLowerCase();
@@ -296,11 +274,10 @@ class DialogueManager {
       seenLocal.add(key);
       return true;
     });
-    localStorage.setItem('47r_messages', JSON.stringify(localEntries));
 
     const fallback = [
-      { author: "Neco Arc", text: "Buru-nyuu! Я первая тут написала!", date: "08.11.2026 12:00" },
-      { author: "47R", text: "Если вы это читаете, значит 47OS успешно скомпилирована.", date: "08.11.2026 12:05" }
+      { author: "Нарушитель #0", text: "Buru-nyuu! Я первая тут написала!", date: "08.11.2026, 12:00" },
+      { author: "47R [Admin]", text: "Если вы это читаете, значит 47OS успешно скомпилирована.", date: "08.11.2026, 12:05" }
     ];
     this.renderGuestbookList([...localEntries, ...fallback]);
   }
