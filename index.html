@@ -125,7 +125,7 @@
       </div>
 
       <!-- Icon: Guestbook -->
-      <div class="desktop-icon" id="icon-guestbook" onclick="window.winManager.openWindow('win-guestbook')">
+      <div class="desktop-icon" id="icon-guestbook" onclick="window.dialogueMgr.openGuestbook()">
         <svg viewBox="0 0 32 32">
           <rect x="4" y="4" width="24" height="24" fill="#ffffd0" stroke="#000" stroke-width="2"/>
           <line x1="8" y1="10" x2="24" y2="10" stroke="#008000" stroke-width="2"/>
@@ -442,10 +442,10 @@
       <div class="guestbook-list" id="guestbook-entries"></div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 4px;">
         <div style="display: flex; gap: 4px;">
-          <a href="https://github.com/47Rubles/47Rubles.github.io/issues" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
-            <span>📋</span> Смотреть на GitHub ↗
-          </a>
-          <button class="win-btn" onclick="window.dialogueMgr.clearLocalCache()" title="Удалить дубликаты и локальный кэш" style="color: #666; font-size: 10px;">Очистить кэш</button>
+          <button class="win-btn" onclick="window.dialogueMgr.loadGuestbookEntries()" style="font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+            <span>🔄</span> Обновить реестр
+          </button>
+          <button class="win-btn" onclick="window.dialogueMgr.clearLocalCache()" title="Очистить локальный кэш" style="color: #666; font-size: 10px;">Очистить кэш</button>
         </div>
         <button class="win-btn" onclick="window.winManager.closeWindow('win-guestbook')">Закрыть</button>
       </div>
@@ -510,7 +510,7 @@
       <div class="start-item" onclick="window.winManager.openWindow('win-player'); document.getElementById('start-menu').style.display='none';">
         <span>🎵</span> <span>CD Плеер</span>
       </div>
-      <div class="start-item" onclick="window.winManager.openWindow('win-guestbook'); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.dialogueMgr.openGuestbook(); document.getElementById('start-menu').style.display='none';">
         <span>📋</span> <span>Лог нарушителей</span>
       </div>
       <div class="start-item" onclick="window.starManager.openModal(); document.getElementById('start-menu').style.display='none';">

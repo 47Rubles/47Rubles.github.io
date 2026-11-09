@@ -22,6 +22,11 @@ class DialogueManager {
     // Если URL не указан, форма использует стандартную кнопку-ссылку на GitHub Issue.
     this.gatewayUrl = 'https://47rubles-github-io.tchulkoff-ev.workers.dev/api';
 
+    const guestbookWin = document.getElementById('win-guestbook');
+    if (guestbookWin) {
+      guestbookWin.addEventListener('win:opened', () => this.loadGuestbookEntries());
+    }
+
     // Narrative scripts
     this.scriptBefore = [
       "Ты что тут делаешь?",
@@ -207,7 +212,12 @@ class DialogueManager {
             const assignedAuthor = data.entry?.author || `Нарушитель #${data.entry?.id || ''}`;
             publishContainer.innerHTML = `
               <div style="margin-top: 8px; padding: 6px; background: #e8f8e8; border: 1px inset #2e7d32; font-size: 11px; color: #1b5e20;">
-                <strong>✔ Запись принята! Тебе присвоен статус: ${assignedAuthor}</strong>
+                <div><strong>✔ Запись принята! Тебе присвоен статус: ${assignedAuthor}</strong></div>
+                <div style="margin-top: 6px;">
+                  <button class="win-btn" onclick="window.dialogueMgr.openGuestbook()" style="font-size: 11px; font-weight: bold; padding: 2px 8px; cursor: pointer;">
+                    📋 Открыть реестр нарушителей
+                  </button>
+                </div>
               </div>
             `;
             setTimeout(() => this.loadGuestbookEntries(), 500);
@@ -285,6 +295,13 @@ class DialogueManager {
   clearLocalCache() {
     localStorage.removeItem('47r_messages');
     this.loadGuestbookEntries();
+  }
+
+  openGuestbook() {
+    this.loadGuestbookEntries();
+    if (window.winManager) {
+      window.winManager.openWindow('win-guestbook');
+    }
   }
 
   renderGuestbookList(entries) {
