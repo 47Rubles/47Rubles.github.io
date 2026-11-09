@@ -4,5 +4,11 @@
   "compatibility_date": "2024-09-23",
   "assets": {
     "directory": "."
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "GUESTBOOK_KV",
+      "id": "2a76dd9903b646c9a89107351d571e0a"
+    }
+  ]
 }
