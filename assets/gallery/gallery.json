@@ -1,83 +1,115 @@
-[
-  {
-    "id": "hammer",
-    "title": "Neco-Arc с молотом",
-    "folder": "hand",
-    "category": "Ручная работа",
-    "thumb": "assets/gallery/thumb_hammer.jpg",
-    "file": "assets/gallery/view_hammer.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "gun1",
-    "title": "Neco-Arc с пушкой",
-    "folder": "hand",
-    "category": "Ручная работа",
-    "thumb": "assets/gallery/thumb_gun1.jpg",
-    "file": "assets/gallery/view_gun1.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "agr_sketch",
-    "title": "Neco-Arc Rage + Скетч",
-    "folder": "hand",
-    "category": "Ручная работа",
-    "thumb": "assets/gallery/thumb_agr_sketch.jpg",
-    "file": "assets/gallery/view_agr_sketch.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "ptrd",
-    "title": "Neco-Arc с ПТРД",
-    "folder": "ai",
-    "category": "ИИ арт",
-    "thumb": "assets/gallery/thumb_ptrd.jpg",
-    "file": "assets/gallery/view_ptrd.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "stalcarc",
-    "title": "StalcArc (S.T.A.L.K.E.R.)",
-    "folder": "ai",
-    "category": "ИИ арт",
-    "thumb": "assets/gallery/thumb_stalcarc.jpg",
-    "file": "assets/gallery/view_stalcarc.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "necoz",
-    "title": "Neco-Z",
-    "folder": "ai",
-    "category": "ИИ арт",
-    "thumb": "assets/gallery/thumb_necoz.jpg",
-    "file": "assets/gallery/view_necoz.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "zima",
-    "title": "Кот в варежках (Зима)",
-    "folder": "ai",
-    "category": "ИИ арт",
-    "thumb": "assets/gallery/thumb_zima.jpg",
-    "file": "assets/gallery/view_zima.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "fisheye",
-    "title": "Neco-Arc FishEye Ч/Б",
-    "folder": "ai",
-    "category": "ИИ арт",
-    "thumb": "assets/gallery/thumb_fisheye.jpg",
-    "file": "assets/gallery/view_fisheye.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  },
-  {
-    "id": "bw",
-    "title": "Ч/Б Неко-Арк",
-    "folder": "ai",
-    "category": "ИИ арт",
-    "thumb": "assets/gallery/thumb_bw.jpg",
-    "file": "assets/gallery/view_bw.jpg",
-    "watermark": "Защищено паттерном «47R»"
-  }
-]
+{
+  "version": "2.0",
+  "folders": [
+    {
+      "id": "hand",
+      "title": "Ручная работа",
+      "icon": "🎨",
+      "desc": "Авторские рисунки и ручная графика"
+    },
+    {
+      "id": "ai",
+      "title": "ИИ арты",
+      "icon": "🤖",
+      "desc": "Нейросетевые арты и генерации"
+    },
+    {
+      "id": "memes",
+      "title": "Мемы",
+      "icon": "🐸",
+      "desc": "Мемы, щитпосты и приколы"
+    }
+  ],
+  "items": [
+    {
+      "folder": "hand",
+      "folderTitle": "Ручная работа",
+      "filename": "NA_agr_plusSketch.png",
+      "title": "NA_agr_plusSketch.png",
+      "file": "assets/gallery/hand/NA_agr_plusSketch.png",
+      "thumb": "assets/gallery/.thumbs/hand/NA_agr_plusSketch.png.jpg",
+      "size": 129067,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "hand",
+      "folderTitle": "Ручная работа",
+      "filename": "NA_gun1.png",
+      "title": "NA_gun1.png",
+      "file": "assets/gallery/hand/NA_gun1.png",
+      "thumb": "assets/gallery/.thumbs/hand/NA_gun1.png.jpg",
+      "size": 135765,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "hand",
+      "folderTitle": "Ручная работа",
+      "filename": "NA_hammer.png",
+      "title": "NA_hammer.png",
+      "file": "assets/gallery/hand/NA_hammer.png",
+      "thumb": "assets/gallery/.thumbs/hand/NA_hammer.png.jpg",
+      "size": 135301,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "ai",
+      "folderTitle": "ИИ арты",
+      "filename": "LP_Cat_ZIMA.jpeg",
+      "title": "LP_Cat_ZIMA.jpeg",
+      "file": "assets/gallery/ai/LP_Cat_ZIMA.jpeg",
+      "thumb": "assets/gallery/.thumbs/ai/LP_Cat_ZIMA.jpeg.jpg",
+      "size": 179519,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "ai",
+      "folderTitle": "ИИ арты",
+      "filename": "NecoArcFishEyeЧБ.png",
+      "title": "NecoArcFishEyeЧБ.png",
+      "file": "assets/gallery/ai/NecoArcFishEyeЧБ.png",
+      "thumb": "assets/gallery/.thumbs/ai/NecoArcFishEyeЧБ.png.jpg",
+      "size": 629842,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "ai",
+      "folderTitle": "ИИ арты",
+      "filename": "NecoArcPTRD.png",
+      "title": "NecoArcPTRD.png",
+      "file": "assets/gallery/ai/NecoArcPTRD.png",
+      "thumb": "assets/gallery/.thumbs/ai/NecoArcPTRD.png.jpg",
+      "size": 1422847,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "ai",
+      "folderTitle": "ИИ арты",
+      "filename": "NecoZ.png",
+      "title": "NecoZ.png",
+      "file": "assets/gallery/ai/NecoZ.png",
+      "thumb": "assets/gallery/.thumbs/ai/NecoZ.png.jpg",
+      "size": 610043,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "ai",
+      "folderTitle": "ИИ арты",
+      "filename": "StalcArc.png",
+      "title": "StalcArc.png",
+      "file": "assets/gallery/ai/StalcArc.png",
+      "thumb": "assets/gallery/.thumbs/ai/StalcArc.png.jpg",
+      "size": 1661903,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "ai",
+      "folderTitle": "ИИ арты",
+      "filename": "ЧБ_НА_РГ.png",
+      "title": "ЧБ_НА_РГ.png",
+      "file": "assets/gallery/ai/ЧБ_НА_РГ.png",
+      "thumb": "assets/gallery/.thumbs/ai/ЧБ_НА_РГ.png.jpg",
+      "size": 1298892,
+      "watermark": "Защищено паттерном «47R»"
+    }
+  ]
+}

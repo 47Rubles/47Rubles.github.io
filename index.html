@@ -257,8 +257,8 @@
   <!-- Window 3: Gallery Explorer -->
   <div class="window" id="win-gallery" style="top: 80px; left: 110px; width: 620px; display: none;">
     <div class="title-bar">
-      <div class="title-bar-text">
-        <span>🖼</span> Галерея 47R (Ручные арты, ИИ-арт, Мемы)
+      <div class="title-bar-text" id="gallery-window-title">
+        <span>📁</span> C:\Галерея_47R
       </div>
       <div class="title-bar-controls">
         <button class="title-btn btn-minimize">_</button>
@@ -267,36 +267,47 @@
       </div>
     </div>
     <div class="menu-bar">
-      <span class="menu-item" onclick="window.galleryMgr.switchFolder('all')">Все</span>
-      <span class="menu-item" onclick="window.galleryMgr.switchFolder('hand')">Ручные</span>
-      <span class="menu-item" onclick="window.galleryMgr.switchFolder('ai')">ИИ-арт</span>
-      <span class="menu-item" onclick="window.galleryMgr.switchFolder('memes')">Мемы</span>
-      <span class="menu-item" onclick="alert('Все изображения защищены встроенным знаком «47R».')">Защита</span>
+      <span class="menu-item" onclick="window.galleryMgr.goToRoot()">Корень</span>
+      <span class="menu-item" onclick="window.galleryMgr.openFolder('hand')">Ручная работа</span>
+      <span class="menu-item" onclick="window.galleryMgr.openFolder('ai')">ИИ арты</span>
+      <span class="menu-item" onclick="window.galleryMgr.openFolder('memes')">Мемы</span>
+      <span class="menu-item" onclick="alert('Все иллюстрации защищены водяным знаком «47R». Исходники хранятся локально у автора.')">Справка</span>
     </div>
-    <div class="window-body">
-      <!-- Folder Directory Navigation Toolbar -->
-      <div class="gallery-folder-bar" style="display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap;">
-        <button class="win-btn gallery-tab active" data-folder="all" onclick="window.galleryMgr.switchFolder('all')">
-          📁 Все работы (<span id="count-all">9</span>)
+    <div class="window-body" style="display: flex; flex-direction: column; gap: 4px;">
+      <!-- Explorer Navigation Toolbar -->
+      <div class="explorer-toolbar" style="display: flex; align-items: center; gap: 4px; padding: 2px 0;">
+        <button class="win-btn" id="gallery-btn-back" onclick="window.galleryMgr.goToRoot()" title="Назад в корень каталога" disabled style="display: flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px;">
+          <span>⬅</span> <span>Назад</span>
         </button>
-        <button class="win-btn gallery-tab" data-folder="hand" onclick="window.galleryMgr.switchFolder('hand')">
-          🎨 Ручная работа (<span id="count-hand">3</span>)
+        <button class="win-btn" id="gallery-btn-up" onclick="window.galleryMgr.goToRoot()" title="Вверх на один уровень" disabled style="display: flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px;">
+          <span>⬆</span> <span>Вверх</span>
         </button>
-        <button class="win-btn gallery-tab" data-folder="ai" onclick="window.galleryMgr.switchFolder('ai')">
-          🤖 ИИ арты (<span id="count-ai">6</span>)
+        <div style="width: 1px; height: 18px; background: #808080; border-right: 1px solid #fff; margin: 0 2px;"></div>
+        <button class="win-btn" onclick="window.galleryMgr.refresh()" title="Обновить" style="display: flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px;">
+          <span>⟳</span> <span>Обновить</span>
         </button>
-        <button class="win-btn gallery-tab" data-folder="memes" onclick="window.galleryMgr.switchFolder('memes')">
-          🐸 Мемы (<span id="count-memes">0</span>)
+        <button class="win-btn" id="gallery-btn-open-selected" onclick="window.galleryMgr.openSelected()" title="Открыть выбранный объект" style="display: flex; align-items: center; gap: 4px; font-size: 11px; padding: 2px 6px;">
+          <span>📂</span> <span>Открыть</span>
         </button>
       </div>
 
-      <!-- Path Breadcrumb Bar -->
-      <div class="gallery-address-bar" style="background: #fff; border: 1px inset #808080; padding: 2px 6px; font-size: 11px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-        <span style="color: #666;">Каталог:</span>
-        <strong id="gallery-current-path">C:\Галерея_47R\Все работы</strong>
+      <!-- Address Bar -->
+      <div class="explorer-address-bar" style="display: flex; align-items: center; gap: 6px; font-size: 11px;">
+        <span style="color: #444; font-weight: bold;">Адрес:</span>
+        <div style="flex: 1; background: #fff; border: 2px inset #dfdfdf; padding: 2px 6px; font-family: var(--font-mono); font-size: 11px; display: flex; align-items: center; gap: 4px; overflow: hidden; white-space: nowrap;">
+          <span style="font-size: 12px;">📁</span>
+          <span id="gallery-current-path">C:\Галерея_47R</span>
+        </div>
       </div>
 
+      <!-- Grid for Folders or Files -->
       <div class="gallery-grid" id="gallery-grid-el"></div>
+
+      <!-- Status Bar -->
+      <div class="explorer-status-bar" style="display: flex; justify-content: space-between; font-size: 11px; padding: 2px 6px; background: #c0c0c0; border: 1px inset #808080;">
+        <span id="gallery-status-count">3 папки</span>
+        <span>Мой компьютер • 47OS</span>
+      </div>
     </div>
   </div>
 

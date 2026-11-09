@@ -10,6 +10,7 @@ __pycache__/
 *.py[cod]
 
 # Системные файлы и редакторы
+assets/gallery/_raw_originals/
 Thumbs.db
 Desktop.ini
 .DS_Store
