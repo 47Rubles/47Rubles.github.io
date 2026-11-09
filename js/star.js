@@ -17,6 +17,7 @@ class StarManager {
   }
 
   updateIconState() {
+    this.starIconSvg = document.getElementById('desktop-star-svg');
     if (this.isStarred && this.starIconSvg) {
       // Golden glowing star
       this.starIconSvg.innerHTML = `
@@ -103,7 +104,13 @@ class StarManager {
     statusMsg.innerHTML = '<span style="color: #000080;">⏳ Проверяем звёзды пользователя @' + username + ' через GitHub API...</span>';
 
     try {
-      const res = await fetch(`https://api.github.com/users/${encodeURIComponent(username)}/starred?per_page=100`);
+      // Исключаем кэширование браузера и GitHub через no-store и случайный параметр
+      const res = await fetch(`https://api.github.com/users/${encodeURIComponent(username)}/starred?per_page=100&_=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Accept': 'application/vnd.github+json'
+        }
+      });
       if (res.status === 404) {
         statusMsg.innerHTML = `<span style="color: #b71c1c;">⚠ Пользователь @${username} не найден на GitHub.</span>`;
         verifyBtn.disabled = false;
