@@ -788,3 +788,112 @@
   border-bottom: 1px solid var(--button-highlight);
   margin: 3px 2px;
 }
+
+/* MBTL Remote Play Desktop & Window Styling */
+.desktop-icon-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.desktop-icon-badge {
+  position: absolute;
+  top: 2px;
+  right: 14px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid #000;
+  box-shadow: 0 0 4px currentColor;
+  z-index: 5;
+}
+
+.badge-offline { background: #718096; color: #718096; }
+.badge-online { background: #00ff66; color: #00ff66; animation: badgeBlink 1.4s infinite; }
+.badge-busy { background: #ff3333; color: #ff3333; }
+
+@keyframes badgeBlink {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px #00ff66); }
+  50% { opacity: 0.35; filter: none; }
+}
+
+.mbtl-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mbtl-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #000080;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  box-sizing: border-box;
+}
+
+.mbtl-screen-box {
+  position: relative;
+  background: #050505;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 2px inset #808080;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mbtl-screen-box video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background-color: #000;
+}
+
+.mbtl-screen-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 8, 12, 0.92);
+  color: #00ff66;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: center;
+  padding: 16px;
+  z-index: 10;
+}
+
+.mbtl-controls-box {
+  background: #fff;
+  border: 1px inset #808080;
+  padding: 6px 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mbtl-key-badge {
+  display: inline-block;
+  background: #e0e0e0;
+  border: 1px outset #fff;
+  border-right-color: #404040;
+  border-bottom-color: #404040;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-weight: bold;
+  font-size: 10px;
+  color: #000;
+  transition: all 0.08s ease;
+}
+

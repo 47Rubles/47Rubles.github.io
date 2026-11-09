@@ -144,6 +144,21 @@
         </svg>
         <div class="desktop-icon-label">Оценить_47OS</div>
       </div>
+
+      <!-- Icon: MBTL Remote Play -->
+      <div class="desktop-icon" id="icon-mbtl" onclick="window.mbtlClient.openWindow()" style="position: relative;">
+        <div class="desktop-icon-badge badge-offline" id="mbtl-status-led" title="Статус: Оффлайн"></div>
+        <svg viewBox="0 0 32 32">
+          <rect x="2" y="8" width="28" height="16" rx="4" fill="#2d3748" stroke="#000" stroke-width="2"/>
+          <rect x="6" y="14" width="8" height="4" fill="#cbd5e0"/>
+          <rect x="8" y="12" width="4" height="8" fill="#cbd5e0"/>
+          <circle cx="21" cy="14" r="1.8" fill="#e53e3e"/>
+          <circle cx="25" cy="14" r="1.8" fill="#3182ce"/>
+          <circle cx="21" cy="18" r="1.8" fill="#dd6b20"/>
+          <circle cx="25" cy="18" r="1.8" fill="#38a169"/>
+        </svg>
+        <div class="desktop-icon-label">МБТЛ.exe</div>
+      </div>
     </div>
 
     <!-- Column 3 (Right edge): Trash & GitHub -->
@@ -494,6 +509,70 @@
     <div class="window-body" id="star-window-body"></div>
   </div>
 
+  <!-- Window 10: MBTL Remote Play -->
+  <div class="window" id="win-mbtl" style="top: 70px; left: 160px; width: 680px; display: none;">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <span>⚔</span> Melty Blood: Type Lumina — Remote Play
+      </div>
+      <div class="title-bar-controls">
+        <button class="title-btn btn-minimize">_</button>
+        <button class="title-btn btn-maximize">口</button>
+        <button class="title-btn btn-close" onclick="window.mbtlClient.disconnect()">✕</button>
+      </div>
+    </div>
+    <div class="menu-bar">
+      <span class="menu-item" onclick="window.mbtlClient.connect()">Подключиться</span>
+      <span class="menu-item" onclick="window.mbtlClient.disconnect()">Отключиться</span>
+      <span class="menu-item" onclick="alert('Melty Blood: Type Lumina Remote Play.\n\nПрямая трансляция боя с ПК автора без звука.\nУправление: Стрелки + NumPad.\n\nГорячие клавиши хоста:\nF9 — Блокировка/разблокировка управления P2\nF10 — Смена игрока (передача хода следующему зрителю)')">Справка</span>
+    </div>
+    <div class="window-body mbtl-container">
+      <!-- Status Top Bar -->
+      <div class="mbtl-status-bar">
+        <div id="mbtl-win-status">⚫ ОФФЛАЙН</div>
+        <div id="mbtl-win-role">[ ГОСТЬ ]</div>
+        <div id="mbtl-win-lock">Режим ожидания</div>
+        <div id="mbtl-win-queue">Очередь: 0</div>
+      </div>
+
+      <!-- Video Screen -->
+      <div class="mbtl-screen-box">
+        <video id="mbtl-video" autoplay playsinline muted></video>
+        <div class="mbtl-screen-overlay" id="mbtl-screen-overlay">
+          <div style="font-size: 15px; margin-bottom: 6px;">⚫ ХОСТ ОФФЛАЙН</div>
+          <div style="color: #aaa; font-size: 11px;">
+            Хост-скрипт на ПК автора сейчас выключен.<br>
+            Как только 47Rubles запустит игру, вы сможете подключиться!
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Guide -->
+      <div class="mbtl-controls-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 2px;">
+          <span style="font-weight: bold; color: #000080;">🎮 Раскладка Игрока 2 (NumPad + Стрелки):</span>
+          <span style="font-size: 10px; color: #666;">Без звука • Нулевая задержка P2P</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <strong>Движение:</strong>
+            <span class="mbtl-key-badge" id="key-ArrowUp">↑</span>
+            <span class="mbtl-key-badge" id="key-ArrowDown">↓</span>
+            <span class="mbtl-key-badge" id="key-ArrowLeft">←</span>
+            <span class="mbtl-key-badge" id="key-ArrowRight">→</span>
+          </div>
+          <div>
+            <strong>Атаки:</strong>
+            <span class="mbtl-key-badge" id="key-Numpad7">Num 7 (A: Light)</span>
+            <span class="mbtl-key-badge" id="key-Numpad8">Num 8 (B: Medium)</span>
+            <span class="mbtl-key-badge" id="key-Numpad9">Num 9 (C: Heavy)</span>
+            <span class="mbtl-key-badge" id="key-Numpad4">Num 4 (D: Shield)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Start Menu -->
   <div id="start-menu">
     <div class="start-sidebar">47OS 98</div>
@@ -515,6 +594,9 @@
       </div>
       <div class="start-item" onclick="window.starManager.openModal(); document.getElementById('start-menu').style.display='none';">
         <span>★</span> <span>Оценить 47OS</span>
+      </div>
+      <div class="start-item" onclick="window.mbtlClient.openWindow(); document.getElementById('start-menu').style.display='none';">
+        <span>⚔</span> <span>МБТЛ.exe</span>
       </div>
       <div class="start-divider"></div>
       <div class="start-item" onclick="window.open('https://github.com/47Rubles', '_blank'); document.getElementById('start-menu').style.display='none';">
@@ -559,6 +641,7 @@
   <script src="js/dialogue.js"></script>
   <script src="js/gallery.js"></script>
   <script src="js/star.js"></script>
+  <script src="js/mbtl.js"></script>
 
   <script>
     function updateClock() {
