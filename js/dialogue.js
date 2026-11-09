@@ -256,18 +256,15 @@ class DialogueManager {
   }
 
   async loadGuestbookEntries() {
-    let localEntries = JSON.parse(localStorage.getItem('47r_messages') || '[]');
+    if (!this.guestbookListEl) return;
 
     if (this.gatewayUrl) {
       try {
         const res = await fetch(this.gatewayUrl, { cache: 'no-store' });
         if (res.ok) {
           const dbEntries = await res.json();
-          if (Array.isArray(dbEntries) && dbEntries.length > 0) {
-            // Исключаем дубли между базой и локальным буфером
-            const dbTexts = new Set(dbEntries.map(e => (e.text || '').trim().toLowerCase()));
-            localEntries = localEntries.filter(loc => !dbTexts.has((loc.text || '').trim().toLowerCase()));
-            this.renderGuestbookList([...dbEntries, ...localEntries]);
+          if (Array.isArray(dbEntries)) {
+            this.renderGuestbookList(dbEntries);
             return;
           }
         }
@@ -276,20 +273,9 @@ class DialogueManager {
       }
     }
 
-    // Резервный режим (если база недоступна)
-    const seenLocal = new Set();
-    localEntries = localEntries.filter(loc => {
-      const key = (loc.text || '').trim().toLowerCase();
-      if (seenLocal.has(key)) return false;
-      seenLocal.add(key);
-      return true;
-    });
-
-    const fallback = [
-      { author: "Нарушитель #0", text: "Buru-nyuu! Я первая тут написала!", date: "08.11.2026, 12:00" },
-      { author: "47R [Admin]", text: "Если вы это читаете, значит 47OS успешно скомпилирована.", date: "08.11.2026, 12:05" }
-    ];
-    this.renderGuestbookList([...localEntries, ...fallback]);
+    // Если база пуста или недоступна — показываем только локальные записи пользователя без фейков
+    let localEntries = JSON.parse(localStorage.getItem('47r_messages') || '[]');
+    this.renderGuestbookList(localEntries);
   }
 
   clearLocalCache() {
@@ -307,11 +293,21 @@ class DialogueManager {
   renderGuestbookList(entries) {
     if (!this.guestbookListEl) return;
     this.guestbookListEl.innerHTML = '';
+
+    if (!entries || entries.length === 0) {
+      this.guestbookListEl.innerHTML = `
+        <div style="padding: 16px; text-align: center; color: #666; font-size: 11px; font-style: italic;">
+          [ В реестре нарушителей пока нет записей ]
+        </div>
+      `;
+      return;
+    }
+
     entries.forEach(item => {
       const div = document.createElement('div');
       div.className = 'guestbook-entry';
       div.innerHTML = `
-        <div class="guestbook-entry-header">▸ ${item.author || 'Посетитель'} [${item.date}]:</div>
+        <div class="guestbook-entry-header">▸ ${item.author || 'Нарушитель'} [${item.date}]:</div>
         <div class="guestbook-entry-text">${this.escapeHtml(item.text)}</div>
       `;
       this.guestbookListEl.appendChild(div);
