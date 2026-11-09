@@ -55,17 +55,19 @@ class StarManager {
     } else {
       this.starBody.innerHTML = `
         <div style="display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px;">
-          <div style="font-size: 38px; color: #ffffff;">☆</div>
-          <div style="font-size: 11px; line-height: 1.5;">
+          <div style="font-size: 38px; color: #ffcc00; text-shadow: 0 0 6px #ffaa00;">★</div>
+          <div style="font-size: 11px; line-height: 1.5; flex: 1;">
             <strong>Поддержи проект 47OS 98:</strong><br>
-            1. Нажми <strong>«Перейти на GitHub»</strong> (откроется в новой вкладке).<br>
-            2. Нажми <strong>★ Star</strong> в правом верхнем углу репозитория.<br>
-            3. Вернись сюда и нажми <strong>«Я поставил звезду!»</strong>.
+            Нажми <strong>Star</strong> прямо в этом окне:
+            <div style="margin: 8px 0 8px 0; background: #ffffff; padding: 4px 8px; border: 1px inset #808080; width: fit-content;">
+              <iframe src="https://ghbtns.com/github-btn.html?user=47Rubles&repo=47Rubles.github.io&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160" height="30" title="GitHub Star"></iframe>
+            </div>
+            После отметки нажми <strong>«Зажечь звезду!»</strong>, чтобы включить золотое свечение на рабочем столе.
           </div>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px;">
-          <a href="https://github.com/47Rubles/47Rubles.github.io" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 4px;">↗ Перейти на GitHub</a>
-          <button class="win-btn" onclick="window.starManager.confirmStar()" style="font-weight: bold;">★ Я поставил звезду!</button>
+          <button class="win-btn" onclick="window.starManager.confirmStar()" style="font-weight: bold; background: #d0f0d0;">★ Зажечь звезду в системе!</button>
+          <a href="https://github.com/47Rubles/47Rubles.github.io" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 4px;">Репозиторий ↗</a>
           <button class="win-btn" onclick="window.winManager.closeWindow('win-star')">Позже</button>
         </div>
       `;

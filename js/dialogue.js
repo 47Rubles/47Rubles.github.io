@@ -18,6 +18,10 @@ class DialogueManager {
     this.hasSubmitted = false;
     this.isFinished = false;
 
+    // URL шлюза Cloudflare Worker для отправки сообщений без открытия вкладок.
+    // Если URL не указан, форма использует стандартную кнопку-ссылку на GitHub Issue.
+    this.gatewayUrl = '';
+
     // Narrative scripts
     this.scriptBefore = [
       "Ты что тут делаешь?",
@@ -158,14 +162,14 @@ class DialogueManager {
     this.renderCurrentLine();
   }
 
-  submitMessage() {
+  async submitMessage() {
     const val = this.inputEl.value.trim();
     if (!val) return;
 
     this.hasSubmitted = true;
     this.inputArea.style.display = 'none';
 
-    // 1. Save locally with deduplication
+    // 1. Сохраняем локально с дедупликацией
     let saved = JSON.parse(localStorage.getItem('47r_messages') || '[]');
     const valNorm = val.toLowerCase();
     saved = saved.filter(s => (s.text || '').trim().toLowerCase() !== valNorm);
@@ -176,23 +180,65 @@ class DialogueManager {
     saved.unshift(newEntry);
     localStorage.setItem('47r_messages', JSON.stringify(saved));
 
-    // 2. Prepare GitHub Issue submission link
+    // 2. Резервная ссылка на создание Issue на GitHub
     const ghIssueUrl = `https://github.com/47Rubles/47Rubles.github.io/issues/new?title=${encodeURIComponent('Запись в лог от ' + newEntry.date)}&body=${encodeURIComponent(val)}`;
 
-    // Show a direct, non-blocking link in the dialogue box
     const publishContainer = document.getElementById('dialogue-publish-area');
     if (publishContainer) {
-      publishContainer.innerHTML = `
-        <div style="margin-top: 8px; padding: 6px; background: #ffffd0; border: 1px inset #808080; font-size: 11px;">
-          <div style="margin-bottom: 6px;">Запись сохранена локально. Хочешь отправить её в публичный лог на GitHub?</div>
-          <div style="display: flex; gap: 6px;">
-            <a href="${ghIssueUrl}" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
-              <span>↗</span> Открыть форму Issue на GitHub
-            </a>
-          </div>
-        </div>
-      `;
       publishContainer.style.display = 'block';
+
+      if (this.gatewayUrl) {
+        // Бесшовный режим через Cloudflare Worker (без открытия новых вкладок)
+        publishContainer.innerHTML = `
+          <div style="margin-top: 8px; padding: 6px; background: #e8f4fc; border: 1px inset #808080; font-size: 11px;">
+            <span class="lcd-blinker">⏳</span> [ СЕТЬ 47OS ]: Отправка в глобальный реестр...
+          </div>
+        `;
+
+        try {
+          const resp = await fetch(this.gatewayUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: val })
+          });
+
+          if (resp.ok) {
+            const data = await resp.json();
+            publishContainer.innerHTML = `
+              <div style="margin-top: 8px; padding: 6px; background: #e8f8e8; border: 1px inset #2e7d32; font-size: 11px; color: #1b5e20;">
+                <strong>✔ Запись #${data.issue_number} успешно принята и занесена в реестр!</strong>
+              </div>
+            `;
+            setTimeout(() => this.loadGuestbookEntries(), 800);
+          } else {
+            throw new Error(`Статус шлюза: ${resp.status}`);
+          }
+        } catch (err) {
+          console.warn("Шлюз недоступен, открываем резервный вариант:", err);
+          publishContainer.innerHTML = `
+            <div style="margin-top: 8px; padding: 6px; background: #ffffd0; border: 1px inset #808080; font-size: 11px;">
+              <div style="margin-bottom: 6px;">Запись сохранена локально. Шлюз офлайн, отправить вручную через GitHub?</div>
+              <div style="display: flex; gap: 6px;">
+                <a href="${ghIssueUrl}" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                  <span>↗</span> Открыть форму Issue на GitHub
+                </a>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        // Резервный режим (если шлюз пока не настроен)
+        publishContainer.innerHTML = `
+          <div style="margin-top: 8px; padding: 6px; background: #ffffd0; border: 1px inset #808080; font-size: 11px;">
+            <div style="margin-bottom: 6px;">Запись сохранена локально. Хочешь отправить её в публичный лог на GitHub?</div>
+            <div style="display: flex; gap: 6px;">
+              <a href="${ghIssueUrl}" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                <span>↗</span> Открыть форму Issue на GitHub
+              </a>
+            </div>
+          </div>
+        `;
+      }
     }
 
     this.loadGuestbookEntries();
