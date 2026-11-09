@@ -47,7 +47,7 @@ class StarManager {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
           <button class="win-btn" onclick="window.starManager.resetStar()" style="color: #666; font-size: 10px;">Сбросить отметку</button>
           <div style="display: flex; gap: 6px;">
-            <button class="win-btn" onclick="window.open('https://github.com/47Rubles/47Rubles.github.io', '_blank')">Репозиторий ↗</button>
+            <a href="https://github.com/47Rubles/47Rubles.github.io" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 4px;">Репозиторий ↗</a>
             <button class="win-btn" onclick="window.winManager.closeWindow('win-star')">Закрыть</button>
           </div>
         </div>
@@ -64,7 +64,7 @@ class StarManager {
           </div>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px;">
-          <button class="win-btn" onclick="window.open('https://github.com/47Rubles/47Rubles.github.io', '_blank')">↗ Перейти на GitHub</button>
+          <a href="https://github.com/47Rubles/47Rubles.github.io" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 4px;">↗ Перейти на GitHub</a>
           <button class="win-btn" onclick="window.starManager.confirmStar()" style="font-weight: bold;">★ Я поставил звезду!</button>
           <button class="win-btn" onclick="window.winManager.closeWindow('win-star')">Позже</button>
         </div>

@@ -193,10 +193,10 @@ class GalleryManager {
 
     if (filesInFolder.length === 0) {
       this.gridEl.innerHTML = `
-        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #555; text-align: center;">
-          <div style="font-size: 40px; margin-bottom: 6px;">📁</div>
-          <div style="font-weight: bold; font-size: 13px; margin-bottom: 4px;">Папка «${currentFolderInfo.title}» пуста</div>
-          <div style="font-size: 11px; color: #777;">Чтобы добавить сюда файлы, поместите их в каталог<br><code>assets/gallery/${this.currentFolder}/</code> и запустите <code>python tools/update_gallery.py</code>.</div>
+        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666; text-align: center;">
+          <div style="font-size: 38px; margin-bottom: 8px;">📁</div>
+          <div style="font-weight: bold; font-size: 12px; margin-bottom: 4px;">Папка «${currentFolderInfo.title}» пуста</div>
+          <div style="font-size: 11px; color: #888;">В этой папке пока нет файлов.</div>
         </div>
       `;
       return;

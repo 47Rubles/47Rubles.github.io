@@ -416,18 +416,20 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .lcd-title {
-  font-size: 11px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: #33ff33;
+  white-space: pre;
   overflow: hidden;
-  white-space: nowrap;
-  animation: marquee 10s linear infinite;
-}
-
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  text-overflow: clip;
+  height: 16px;
+  line-height: 16px;
+  text-shadow: 0 0 4px rgba(51, 255, 51, 0.45);
 }
 
 .lcd-status {

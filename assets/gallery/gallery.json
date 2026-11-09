@@ -52,6 +52,16 @@
       "watermark": "Защищено паттерном «47R»"
     },
     {
+      "folder": "hand",
+      "folderTitle": "Ручная работа",
+      "filename": "NecoArcFishEyeЧБ.png",
+      "title": "NecoArcFishEyeЧБ.png",
+      "file": "assets/gallery/hand/NecoArcFishEyeЧБ.png",
+      "thumb": "assets/gallery/.thumbs/hand/NecoArcFishEyeЧБ.png.jpg",
+      "size": 629842,
+      "watermark": "Защищено паттерном «47R»"
+    },
+    {
       "folder": "ai",
       "folderTitle": "ИИ арты",
       "filename": "LP_Cat_ZIMA.jpeg",
@@ -110,6 +120,86 @@
       "thumb": "assets/gallery/.thumbs/ai/ЧБ_НА_РГ.png.jpg",
       "size": 1298892,
       "watermark": "Защищено паттерном «47R»"
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "72-73.webp",
+      "title": "72-73.webp",
+      "file": "assets/gallery/memes/72-73.webp",
+      "thumb": "assets/gallery/.thumbs/memes/72-73.webp.jpg",
+      "size": 9966,
+      "watermark": ""
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "B_A_E.jpg",
+      "title": "B_A_E.jpg",
+      "file": "assets/gallery/memes/B_A_E.jpg",
+      "thumb": "assets/gallery/.thumbs/memes/B_A_E.jpg.jpg",
+      "size": 204896,
+      "watermark": ""
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "frank-west-dead-rising.gif",
+      "title": "frank-west-dead-rising.gif",
+      "file": "assets/gallery/memes/frank-west-dead-rising.gif",
+      "thumb": "assets/gallery/.thumbs/memes/frank-west-dead-rising.gif.jpg",
+      "size": 2737622,
+      "watermark": ""
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "loooooong.png",
+      "title": "loooooong.png",
+      "file": "assets/gallery/memes/loooooong.png",
+      "thumb": "assets/gallery/.thumbs/memes/loooooong.png.jpg",
+      "size": 330994,
+      "watermark": ""
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "neco-arc-cupcake.gif",
+      "title": "neco-arc-cupcake.gif",
+      "file": "assets/gallery/memes/neco-arc-cupcake.gif",
+      "thumb": "assets/gallery/.thumbs/memes/neco-arc-cupcake.gif.jpg",
+      "size": 485278,
+      "watermark": ""
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "nosochki_rodnie.png",
+      "title": "nosochki_rodnie.png",
+      "file": "assets/gallery/memes/nosochki_rodnie.png",
+      "thumb": "assets/gallery/.thumbs/memes/nosochki_rodnie.png.jpg",
+      "size": 41055,
+      "watermark": ""
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "wiz.webp",
+      "title": "wiz.webp",
+      "file": "assets/gallery/memes/wiz.webp",
+      "thumb": "assets/gallery/.thumbs/memes/wiz.webp.jpg",
+      "size": 59176,
+      "watermark": ""
+    },
+    {
+      "folder": "memes",
+      "folderTitle": "Мемы",
+      "filename": "work.jpg",
+      "title": "work.jpg",
+      "file": "assets/gallery/memes/work.jpg",
+      "thumb": "assets/gallery/.thumbs/memes/work.jpg.jpg",
+      "size": 146978,
+      "watermark": ""
     }
   ]
 }

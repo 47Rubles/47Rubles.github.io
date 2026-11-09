@@ -165,34 +165,46 @@ class DialogueManager {
     this.hasSubmitted = true;
     this.inputArea.style.display = 'none';
 
-    // 1. Save locally
-    const saved = JSON.parse(localStorage.getItem('47r_messages') || '[]');
+    // 1. Save locally with deduplication
+    let saved = JSON.parse(localStorage.getItem('47r_messages') || '[]');
+    const valNorm = val.toLowerCase();
+    saved = saved.filter(s => (s.text || '').trim().toLowerCase() !== valNorm);
     const newEntry = {
       text: val,
       date: new Date().toLocaleString('ru-RU')
     };
     saved.unshift(newEntry);
     localStorage.setItem('47r_messages', JSON.stringify(saved));
-    this.renderGuestbookList(saved);
 
-    // 2. Open GitHub Issue submission
+    // 2. Prepare GitHub Issue submission link
     const ghIssueUrl = `https://github.com/47Rubles/47Rubles.github.io/issues/new?title=${encodeURIComponent('Запись в лог от ' + newEntry.date)}&body=${encodeURIComponent(val)}`;
-    
-    setTimeout(() => {
-      if (confirm("Отправить эту запись прямо в GitHub Issues репозитория 47Rubles, чтобы её видели все?")) {
-        window.open(ghIssueUrl, '_blank');
-      }
-    }, 1200);
 
+    // Show a direct, non-blocking link in the dialogue box
+    const publishContainer = document.getElementById('dialogue-publish-area');
+    if (publishContainer) {
+      publishContainer.innerHTML = `
+        <div style="margin-top: 8px; padding: 6px; background: #ffffd0; border: 1px inset #808080; font-size: 11px;">
+          <div style="margin-bottom: 6px;">Запись сохранена локально. Хочешь отправить её в публичный лог на GitHub?</div>
+          <div style="display: flex; gap: 6px;">
+            <a href="${ghIssueUrl}" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-weight: bold; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+              <span>↗</span> Открыть форму Issue на GitHub
+            </a>
+          </div>
+        </div>
+      `;
+      publishContainer.style.display = 'block';
+    }
+
+    this.loadGuestbookEntries();
     this.step = this.scriptBefore.length;
     this.renderCurrentLine();
   }
 
   async loadGuestbookEntries() {
-    const localEntries = JSON.parse(localStorage.getItem('47r_messages') || '[]');
-    
+    let localEntries = JSON.parse(localStorage.getItem('47r_messages') || '[]');
+
     try {
-      const res = await fetch('https://api.github.com/repos/47Rubles/47Rubles.github.io/issues?state=all');
+      const res = await fetch('https://api.github.com/repos/47Rubles/47Rubles.github.io/issues?state=all&per_page=50');
       if (res.ok) {
         const issues = await res.json();
         const ghEntries = issues.map(iss => ({
@@ -200,16 +212,53 @@ class DialogueManager {
           author: iss.user?.login || 'Гость',
           date: new Date(iss.created_at).toLocaleString('ru-RU')
         }));
+
+        // Deduplication: if message is already in GitHub, remove it from local cache!
+        const ghTexts = new Set(ghEntries.map(e => (e.text || '').trim().toLowerCase()));
+        localEntries = localEntries.filter(loc => {
+          const key = (loc.text || '').trim().toLowerCase();
+          return key && !ghTexts.has(key);
+        });
+
+        // Deduplicate local entries among themselves
+        const seenLocal = new Set();
+        localEntries = localEntries.filter(loc => {
+          const key = (loc.text || '').trim().toLowerCase();
+          if (seenLocal.has(key)) return false;
+          seenLocal.add(key);
+          return true;
+        });
+
+        // Save cleaned local entries back to storage
+        localStorage.setItem('47r_messages', JSON.stringify(localEntries));
+
         this.renderGuestbookList([...ghEntries, ...localEntries]);
         return;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Could not fetch GitHub Issues:", e);
+    }
+
+    // Fallback if offline
+    const seenLocal = new Set();
+    localEntries = localEntries.filter(loc => {
+      const key = (loc.text || '').trim().toLowerCase();
+      if (seenLocal.has(key)) return false;
+      seenLocal.add(key);
+      return true;
+    });
+    localStorage.setItem('47r_messages', JSON.stringify(localEntries));
 
     const fallback = [
       { author: "Neco Arc", text: "Buru-nyuu! Я первая тут написала!", date: "08.11.2026 12:00" },
       { author: "47R", text: "Если вы это читаете, значит 47OS успешно скомпилирована.", date: "08.11.2026 12:05" }
     ];
     this.renderGuestbookList([...localEntries, ...fallback]);
+  }
+
+  clearLocalCache() {
+    localStorage.removeItem('47r_messages');
+    this.loadGuestbookEntries();
   }
 
   renderGuestbookList(entries) {

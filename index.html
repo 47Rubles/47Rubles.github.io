@@ -206,6 +206,8 @@
           <button class="win-btn" id="guestbook-submit">Отправить в лог</button>
         </div>
 
+        <div id="dialogue-publish-area" style="display: none;"></div>
+
         <div class="dialogue-nav-hint" id="dialogue-hint">▼ Кликни, чтобы продолжить...</div>
       </div>
     </div>
@@ -438,8 +440,13 @@
         Записи, оставленные посетителями в диалоговом окне:
       </div>
       <div class="guestbook-list" id="guestbook-entries"></div>
-      <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-        <button class="win-btn" onclick="window.open('https://github.com/47Rubles/47Rubles.github.io/issues', '_blank')">Смотреть на GitHub Issues ↗</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 4px;">
+        <div style="display: flex; gap: 4px;">
+          <a href="https://github.com/47Rubles/47Rubles.github.io/issues" target="_blank" rel="noopener noreferrer" class="win-btn" style="text-decoration: none; color: #000; font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+            <span>📋</span> Смотреть на GitHub ↗
+          </a>
+          <button class="win-btn" onclick="window.dialogueMgr.clearLocalCache()" title="Удалить дубликаты и локальный кэш" style="color: #666; font-size: 10px;">Очистить кэш</button>
+        </div>
         <button class="win-btn" onclick="window.winManager.closeWindow('win-guestbook')">Закрыть</button>
       </div>
     </div>

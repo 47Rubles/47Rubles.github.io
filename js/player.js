@@ -21,11 +21,18 @@ class AudioPlayer {
     this.secondsElapsed = 0;
     this.videoId = 'lsaN3mL-Frg';
     this.volume = 50;
+
+    // Vintage LCD character ticker
+    this.trackTitle = "1. Great Cat's Village R || Jazz Remix (Melty Blood)    ***    ";
+    this.tickerInterval = null;
+    this.tickerOffset = 0;
+    this.lcdCharWidth = 32;
     
     this.init();
   }
 
   init() {
+    this.resetTicker();
     // Volume
     this.volumeSlider.addEventListener('input', (e) => {
       this.volume = parseInt(e.target.value, 10);
@@ -48,6 +55,7 @@ class AudioPlayer {
       this.pause();
       this.secondsElapsed = 0;
       this.updateTimeDisplay();
+      this.resetTicker();
       if (window.necoPet && typeof window.necoPet.enforceMusic === 'function') {
         window.necoPet.enforceMusic(this.playerWindowEl, () => this.play());
       }
@@ -93,14 +101,43 @@ class AudioPlayer {
           if (e.data === YT.PlayerState.PLAYING) {
             this.isPlaying = true;
             this.startTimer();
-            this.lcdTitle.textContent = "1. Great Cat's Village R || Jazz Remix";
+            this.startTicker();
           } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
             this.isPlaying = false;
             this.stopTimer();
+            this.stopTicker();
           }
         }
       }
     });
+  }
+
+  startTicker() {
+    this.stopTicker();
+    const fullText = this.trackTitle;
+    const doubleText = fullText + fullText;
+
+    this.tickerInterval = setInterval(() => {
+      if (!this.lcdTitle) return;
+      const slice = doubleText.slice(this.tickerOffset, this.tickerOffset + this.lcdCharWidth);
+      this.lcdTitle.textContent = slice;
+      this.tickerOffset = (this.tickerOffset + 1) % fullText.length;
+    }, 240);
+  }
+
+  stopTicker() {
+    if (this.tickerInterval) {
+      clearInterval(this.tickerInterval);
+      this.tickerInterval = null;
+    }
+  }
+
+  resetTicker() {
+    this.stopTicker();
+    this.tickerOffset = 0;
+    if (this.lcdTitle) {
+      this.lcdTitle.textContent = this.trackTitle.slice(0, this.lcdCharWidth);
+    }
   }
 
   play() {
@@ -124,6 +161,7 @@ class AudioPlayer {
     }
     this.isPlaying = false;
     this.stopTimer();
+    this.stopTicker();
   }
 
   startTimer() {
