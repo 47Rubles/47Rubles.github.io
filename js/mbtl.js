@@ -1,6 +1,10 @@
 /**
  * 47OS 98 — Melty Blood: Type Lumina (MBTL Remote Play)
  * Клиентский модуль WebRTC-стриминга и захвата управления Игрока 2.
+ * - Подключение по умолчанию как Зритель (просмотр без участия)
+ * - Кнопка "Встать в очередь на бой" для перехода в бойцы
+ * - Двойная раскладка управления: Стрелки/NumPad + WSDA/JUIO
+ * - Двусторонний замер пинга в реальном времени
  */
 
 class MBTLClient {
@@ -15,12 +19,30 @@ class MBTLClient {
     this.pingTimer = null;
     this.currentPing = null;
     
-    this.role = 'guest'; // 'player2' | 'spectator' | 'guest'
+    this.role = 'spectator'; // 'player2' | 'spectator'
+    this.inQueue = false;
+    this.queuePosition = 0;
     this.isBlockedByHost = false;
     this.isOnline = false;
     this.isConnected = false;
 
-    // Разрешенные клавиши (только файтинг-раскладка)
+    // Дублирование клавиш (WSDA + JUIO дублируют Стрелки + NumPad)
+    this.keyAliases = {
+      'KeyW': 'ArrowUp',
+      'KeyS': 'ArrowDown',
+      'KeyA': 'ArrowLeft',
+      'KeyD': 'ArrowRight',
+      'KeyU': 'Numpad7', // A (Light)
+      'KeyI': 'Numpad8', // B (Medium)
+      'KeyO': 'Numpad9', // C (Heavy)
+      'KeyJ': 'Numpad4', // D (Shield)
+      'Digit7': 'Numpad7',
+      'Digit8': 'Numpad8',
+      'Digit9': 'Numpad9',
+      'Digit4': 'Numpad4'
+    };
+
+    // Канонические разрешенные клавиши файтинга
     this.allowedKeys = new Set([
       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
       'Numpad7', 'Numpad8', 'Numpad9', 'Numpad4'
@@ -57,7 +79,7 @@ class MBTLClient {
           ledEl.title = 'Статус: Оффлайн (хост на ПК не запущен)';
         } else if (data.active_player) {
           ledEl.classList.add('badge-busy');
-          ledEl.title = `Статус: В бою (Зрителей: ${data.queue_count || 0})`;
+          ledEl.title = `Статус: В бою (Очередь: ${data.queue_count || 0})`;
         } else {
           ledEl.classList.add('badge-online');
           ledEl.title = 'Статус: Онлайн (Свободно для боя!)';
@@ -95,7 +117,7 @@ class MBTLClient {
           overlayEl.innerHTML = `
             <div style="font-size: 16px; color: #00ff66; margin-bottom: 8px;">🟢 ХОСТ В СЕТИ</div>
             <button class="win-btn" onclick="window.mbtlClient.connect()" style="font-size: 12px; padding: 5px 16px; cursor: pointer;">
-              ⚔ Войти в бой
+              ⚔ Войти на трансляцию
             </button>
           `;
         }
@@ -147,7 +169,7 @@ class MBTLClient {
         }
       };
 
-      // DataChannel для кнопок
+      // DataChannel для кнопок и сигналов
       this.dataChannel = this.pc.createDataChannel('mbtl-input', {
         ordered: true
       });
@@ -166,6 +188,7 @@ class MBTLClient {
             } catch (e) {}
           }
         }, 1200);
+        this.updateControlIndicator();
       };
 
       this.dataChannel.onmessage = (event) => {
@@ -268,10 +291,12 @@ class MBTLClient {
               clearInterval(this.pollTimer);
               this.pollTimer = null;
               await this.pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-              this.role = data.role || 'spectator';
+              // Все гости стартуют в режиме зрителя
+              this.role = 'spectator';
+              this.inQueue = false;
               this.isBlockedByHost = Boolean(data.is_blocked);
               this.updateControlIndicator();
-              console.log('WebRTC Answer accepted! Role:', this.role);
+              console.log('WebRTC Answer accepted! Role: Spectator');
             }
           }
         } catch (e) {
@@ -288,6 +313,32 @@ class MBTLClient {
           <button class="win-btn" onclick="window.mbtlClient.connect()">Попробовать снова</button>
         `;
       }
+    }
+  }
+
+  toggleQueue() {
+    if (!this.dataChannel || this.dataChannel.readyState !== 'open') {
+      alert('Сначала подключитесь к трансляции!');
+      return;
+    }
+
+    if (this.role === 'player2' || this.inQueue) {
+      // Покинуть бой или выйти из очереди
+      try {
+        this.dataChannel.send(JSON.stringify({ type: 'leave_queue' }));
+      } catch (e) {}
+      this.role = 'spectator';
+      this.inQueue = false;
+      this.queuePosition = 0;
+      this.releaseAllKeys();
+      this.updateControlIndicator();
+    } else {
+      // Встать в очередь на бой
+      try {
+        this.dataChannel.send(JSON.stringify({ type: 'join_queue' }));
+      } catch (e) {}
+      this.inQueue = true;
+      this.updateControlIndicator();
     }
   }
 
@@ -316,34 +367,82 @@ class MBTLClient {
       this.updateControlIndicator();
     } else if (msg.type === 'role') {
       this.role = msg.role;
+      if (msg.blocked !== undefined) {
+        this.isBlockedByHost = Boolean(msg.blocked);
+      }
+      if (this.role === 'player2') {
+        this.inQueue = false;
+      }
       this.updateControlIndicator();
+      if (msg.queue_count !== undefined) {
+        const winQueueEl = document.getElementById('mbtl-win-queue');
+        if (winQueueEl) winQueueEl.textContent = `Очередь: ${msg.queue_count}`;
+      }
+    } else if (msg.type === 'queue_info') {
+      this.inQueue = Boolean(msg.in_queue);
+      this.queuePosition = msg.position || 0;
+      this.updateControlIndicator();
+      if (msg.queue_count !== undefined) {
+        const winQueueEl = document.getElementById('mbtl-win-queue');
+        if (winQueueEl) winQueueEl.textContent = `Очередь: ${msg.queue_count}`;
+      }
     } else if (msg.type === 'kicked') {
       this.role = 'spectator';
+      this.inQueue = false;
+      this.queuePosition = 0;
       this.releaseAllKeys();
       this.updateControlIndicator();
-      alert('Хост завершил текущий раунд (F10). Управление передано следующему игроку в очереди.');
+      alert('Хост завершил текущий раунд (F10). Вы переведены в режим зрителя.');
     }
   }
 
   updateControlIndicator() {
     const roleEl = document.getElementById('mbtl-win-role');
     const lockEl = document.getElementById('mbtl-win-lock');
+    const queueBtn = document.getElementById('mbtl-queue-btn');
 
     if (roleEl) {
       if (this.role === 'player2') {
         roleEl.innerHTML = `<span style="color: #00ffcc; font-weight: bold;">[ ИГРОК 2: #${this.clientId} ]</span>`;
+      } else if (this.inQueue) {
+        roleEl.innerHTML = `<span style="color: #ffff77; font-weight: bold;">[ В ОЧЕРЕДИ: #${this.queuePosition || 1} ]</span>`;
       } else {
         roleEl.innerHTML = `<span style="color: #ffffaa;">[ ЗРИТЕЛЬ: #${this.clientId} ]</span>`;
       }
     }
 
     if (lockEl) {
-      if (this.role !== 'player2') {
-        lockEl.innerHTML = '<span style="color: #aaa;">Режим просмотра</span>';
-      } else if (this.isBlockedByHost) {
-        lockEl.innerHTML = '<span style="color: #ff5555; font-weight: bold;">🔒 ЗАБЛОКИРОВАНО ХОСТОМ (Ожидание F9)</span>';
+      if (this.role === 'player2') {
+        if (this.isBlockedByHost) {
+          lockEl.innerHTML = '<span style="color: #ff5555; font-weight: bold;">🔒 ЗАБЛОКИРОВАНО ХОСТОМ (Ожидание F9)</span>';
+        } else {
+          lockEl.innerHTML = '<span style="color: #00ff66; font-weight: bold;">🎮 УПРАВЛЕНИЕ АКТИВНО</span>';
+        }
+      } else if (this.inQueue) {
+        lockEl.innerHTML = '<span style="color: #ffffaa;">Ожидание освобождения слота...</span>';
       } else {
-        lockEl.innerHTML = '<span style="color: #00ff66; font-weight: bold;">🎮 УПРАВЛЕНИЕ АКТИВНО</span>';
+        lockEl.innerHTML = '<span style="color: #aaa;">👁 Только просмотр</span>';
+      }
+    }
+
+    if (queueBtn) {
+      if (!this.isConnected) {
+        queueBtn.style.display = 'none';
+      } else {
+        queueBtn.style.display = 'inline-block';
+        if (this.role === 'player2') {
+          queueBtn.textContent = '🛑 Покинуть бой (в зрители)';
+          queueBtn.style.background = '#ffdada';
+          queueBtn.style.color = '#aa0000';
+        } else if (this.inQueue) {
+          queueBtn.textContent = `❌ Выйти из очереди (Вы #${this.queuePosition || 1})`;
+          queueBtn.style.background = '#ffffd0';
+          queueBtn.style.color = '#886600';
+        } else {
+          queueBtn.textContent = '⚔ Встать в очередь на бой';
+          queueBtn.style.background = '#d8ffd8';
+          queueBtn.style.color = '#006600';
+        }
       }
     }
   }
@@ -354,7 +453,9 @@ class MBTLClient {
       return;
     }
 
-    if (!this.allowedKeys.has(e.code)) {
+    // Преобразуем алиас (WASD / JUIO) в каноническую клавишу
+    const canonical = this.keyAliases[e.code] || e.code;
+    if (!this.allowedKeys.has(canonical)) {
       return;
     }
 
@@ -364,20 +465,21 @@ class MBTLClient {
       return;
     }
 
-    if (!this.pressedKeys.has(e.code)) {
-      this.pressedKeys.add(e.code);
-      this.sendKey(e.code, 'down');
-      this.highlightKeyBadge(e.code, true);
+    if (!this.pressedKeys.has(canonical)) {
+      this.pressedKeys.add(canonical);
+      this.sendKey(canonical, 'down');
+      this.highlightKeyBadge(canonical, true);
     }
   }
 
   handleKeyUp(e) {
-    if (!this.allowedKeys.has(e.code)) return;
+    const canonical = this.keyAliases[e.code] || e.code;
+    if (!this.allowedKeys.has(canonical)) return;
 
-    if (this.pressedKeys.has(e.code)) {
-      this.pressedKeys.delete(e.code);
-      this.sendKey(e.code, 'up');
-      this.highlightKeyBadge(e.code, false);
+    if (this.pressedKeys.has(canonical)) {
+      this.pressedKeys.delete(canonical);
+      this.sendKey(canonical, 'up');
+      this.highlightKeyBadge(canonical, false);
     }
   }
 
@@ -403,8 +505,8 @@ class MBTLClient {
     }
   }
 
-  highlightKeyBadge(code, isPressed) {
-    const el = document.getElementById(`key-${code}`);
+  highlightKeyBadge(canonicalCode, isPressed) {
+    const el = document.getElementById(`key-${canonicalCode}`);
     if (el) {
       if (isPressed) {
         el.style.backgroundColor = '#ffff77';
@@ -430,6 +532,8 @@ class MBTLClient {
       pingEl.textContent = '⚡ Пинг: -- ms';
     }
     this.currentPing = null;
+    this.inQueue = false;
+    this.queuePosition = 0;
     this.releaseAllKeys();
     if (this.dataChannel) {
       try { this.dataChannel.close(); } catch(e) {}
@@ -442,7 +546,7 @@ class MBTLClient {
     const videoEl = document.getElementById('mbtl-video');
     if (videoEl) videoEl.srcObject = null;
     this.isConnected = false;
-    this.role = 'guest';
+    this.role = 'spectator';
     this.checkHostStatus();
     this.updateControlIndicator();
   }

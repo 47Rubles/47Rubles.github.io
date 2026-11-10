@@ -530,8 +530,8 @@
       <!-- Status Top Bar -->
       <div class="mbtl-status-bar">
         <div id="mbtl-win-status">⚫ ОФФЛАЙН</div>
-        <div id="mbtl-win-role">[ ГОСТЬ ]</div>
-        <div id="mbtl-win-lock">Режим ожидания</div>
+        <div id="mbtl-win-role">[ ЗРИТЕЛЬ ]</div>
+        <div id="mbtl-win-lock">👁 Только просмотр</div>
         <div id="mbtl-win-ping">⚡ Пинг: -- ms</div>
         <div id="mbtl-win-queue">Очередь: 0</div>
       </div>
@@ -550,24 +550,29 @@
 
       <!-- Controls & Guide -->
       <div class="mbtl-controls-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 2px;">
-          <span style="font-weight: bold; color: #000080;">🎮 Раскладка Игрока 2 (NumPad + Стрелки):</span>
-          <span style="font-size: 10px; color: #666;">Без звука • Нулевая задержка P2P</span>
+        <div class="mbtl-controls-header">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-weight: bold; color: #000080;">🎮 Управление Игрока 2:</span>
+            <span style="font-size: 10px; color: #555;">(Стрелки / WASD + NumPad / JUIO)</span>
+          </div>
+          <button id="mbtl-queue-btn" class="win-btn mbtl-queue-btn" onclick="window.mbtlClient.toggleQueue()" style="display: none;">
+            ⚔ Встать в очередь на бой
+          </button>
         </div>
-        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
           <div>
             <strong>Движение:</strong>
-            <span class="mbtl-key-badge" id="key-ArrowUp">↑</span>
-            <span class="mbtl-key-badge" id="key-ArrowDown">↓</span>
-            <span class="mbtl-key-badge" id="key-ArrowLeft">←</span>
-            <span class="mbtl-key-badge" id="key-ArrowRight">→</span>
+            <span class="mbtl-key-badge" id="key-ArrowUp">↑ / W</span>
+            <span class="mbtl-key-badge" id="key-ArrowDown">↓ / S</span>
+            <span class="mbtl-key-badge" id="key-ArrowLeft">← / A</span>
+            <span class="mbtl-key-badge" id="key-ArrowRight">→ / D</span>
           </div>
           <div>
             <strong>Атаки:</strong>
-            <span class="mbtl-key-badge" id="key-Numpad7">Num 7 (A: Light)</span>
-            <span class="mbtl-key-badge" id="key-Numpad8">Num 8 (B: Medium)</span>
-            <span class="mbtl-key-badge" id="key-Numpad9">Num 9 (C: Heavy)</span>
-            <span class="mbtl-key-badge" id="key-Numpad4">Num 4 (D: Shield)</span>
+            <span class="mbtl-key-badge" id="key-Numpad7">Num 7 / U (A)</span>
+            <span class="mbtl-key-badge" id="key-Numpad8">Num 8 / I (B)</span>
+            <span class="mbtl-key-badge" id="key-Numpad9">Num 9 / O (C)</span>
+            <span class="mbtl-key-badge" id="key-Numpad4">Num 4 / J (D: Shield)</span>
           </div>
         </div>
       </div>

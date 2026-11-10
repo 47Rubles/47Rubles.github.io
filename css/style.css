@@ -890,6 +890,24 @@
   gap: 4px;
 }
 
+.mbtl-controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 4px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mbtl-queue-btn {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 10px;
+  cursor: pointer;
+  outline: none;
+}
+
 .mbtl-key-badge {
   display: inline-block;
   background: #e0e0e0;
