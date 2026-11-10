@@ -173,10 +173,39 @@ class MBTLClient {
 
   async checkHostStatus() {
     try {
-      const res = await fetch(`${this.apiBase}/status`, { cache: 'no-store' });
-      if (!res.ok) return;
-      const data = await res.json();
-      this.isOnline = Boolean(data.online);
+      let data = null;
+
+      // 1. Мгновенная проверка через ntfy (без лимитов и квот KV)
+      try {
+        const ntfyRes = await fetch('https://ntfy.sh/mbtl_47r_status/json?poll=1', { cache: 'no-store' });
+        if (ntfyRes.ok) {
+          const text = await ntfyRes.text();
+          const lines = text.trim().split('\n').filter(Boolean);
+          if (lines.length > 0) {
+            const raw = JSON.parse(lines[lines.length - 1]);
+            if (raw.event === 'message') {
+              const parsed = JSON.parse(raw.message);
+              const nowSec = Date.now() / 1000;
+              if (parsed && (nowSec - (parsed.time || 0) < 18)) {
+                data = parsed;
+              }
+            }
+          }
+        }
+      } catch (e) {}
+
+      // 2. Резервная проверка через воркер
+      if (!data) {
+        try {
+          const res = await fetch(`${this.apiBase}/status`, { cache: 'no-store' });
+          if (res.ok) {
+            const wData = await res.json();
+            if (wData.online) data = wData;
+          }
+        } catch (e) {}
+      }
+
+      this.isOnline = Boolean(data && data.online);
 
       const ledEl = document.getElementById('mbtl-status-led');
       const winStatusEl = document.getElementById('mbtl-win-status');
@@ -184,10 +213,10 @@ class MBTLClient {
 
       if (ledEl) {
         ledEl.className = 'desktop-icon-badge';
-        if (!data.online) {
+        if (!this.isOnline) {
           ledEl.classList.add('badge-offline');
           ledEl.title = 'Статус: Оффлайн (хост на ПК не запущен)';
-        } else if (data.active_player) {
+        } else if (data && data.active_player) {
           ledEl.classList.add('badge-busy');
           ledEl.title = `Статус: В бою (Очередь: ${data.queue_count || 0})`;
         } else {
@@ -197,9 +226,9 @@ class MBTLClient {
       }
 
       if (winStatusEl) {
-        if (!data.online) {
+        if (!this.isOnline) {
           winStatusEl.innerHTML = '<span style="color: #bbb;">⚫ ОФФЛАЙН</span>';
-        } else if (data.active_player) {
+        } else if (data && data.active_player) {
           winStatusEl.innerHTML = '<span style="color: #ff5555;">🔴 В БОЮ</span>';
         } else {
           winStatusEl.innerHTML = '<span style="color: #00ff66;">🟢 СВОБОДНО</span>';
@@ -207,13 +236,13 @@ class MBTLClient {
       }
 
       if (winQueueEl) {
-        winQueueEl.textContent = `Очередь: ${data.queue_count || 0}`;
+        winQueueEl.textContent = `Очередь: ${data ? (data.queue_count || 0) : 0}`;
       }
 
       // Если окно открыто и не подключены, показываем соответствующую плашку
       const overlayEl = document.getElementById('mbtl-screen-overlay');
       if (overlayEl && !this.isConnected && !this.pollTimer) {
-        if (!data.online) {
+        if (!this.isOnline) {
           overlayEl.style.display = 'flex';
           overlayEl.innerHTML = `
             <div style="font-size: 16px; margin-bottom: 8px;">⚫ ХОСТ ОФФЛАЙН</div>
@@ -225,7 +254,7 @@ class MBTLClient {
         } else {
           overlayEl.style.display = 'flex';
           overlayEl.innerHTML = `
-            <div style="font-size: 16px; color: #00ff66; margin-bottom: 8px;">🟢 ХОСТ В СЕТИ</div>
+            <div style="font-size: 16px; color: #00ff66; margin-bottom: 8px;">🟢 ХОСТ В СЕТИ (60 FPS)</div>
             <button class="win-btn" onclick="window.mbtlClient.connect()" style="font-size: 12px; padding: 6px 18px; cursor: pointer;">
               ⚔ Войти на трансляцию
             </button>
@@ -251,31 +280,31 @@ class MBTLClient {
       overlayEl.style.display = 'flex';
       overlayEl.innerHTML = `
         <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[1/3] ПОИСК МАРШРУТОВ STUN...</div>
-        <div style="color: #aaa; font-size: 11px;">Определение внешнего IP для прямого P2P...</div>
+        <div style="color: #aaa; font-size: 11px;">Быстрое определение внешнего IP (Anycast)...</div>
       `;
     }
 
     try {
       this.disconnect(); // Сброс старой сессии
 
-      // Быстрые Anycast STUN серверы (Cloudflare, Nextcloud, Sipgate + резерв Google)
+      // Генерируем уникальный ID для каждой попытки подключения
+      this.clientId = 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
+
+      // Только скоростные Anycast STUN серверы (ответ 30-50 мс)
       this.pc = new RTCPeerConnection({
         iceServers: [
           { urls: 'stun:stun.cloudflare.com:3478' },
           { urls: 'stun:stun.nextcloud.com:3478' },
-          { urls: 'stun:stun.sipgate.net:3478' },
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun.sipgate.net:3478' }
         ]
       });
 
-      // Приём входящего видео
+      // Приём входящего 60 FPS видеопотока
       this.pc.ontrack = (event) => {
-        console.log('Incoming track received:', event.track.kind);
+        console.log('Incoming video track received:', event.track.kind);
         const videoEl = document.getElementById('mbtl-video');
         if (videoEl && event.streams && event.streams[0]) {
           videoEl.srcObject = event.streams[0];
-          // Обязательные атрибуты для мобильных браузеров (iOS Safari / Android)
           videoEl.muted = true;
           videoEl.setAttribute('playsinline', '');
           videoEl.setAttribute('webkit-playsinline', '');
@@ -286,14 +315,13 @@ class MBTLClient {
         }
       };
 
-      // DataChannel для кнопок и сигналов
+      // DataChannel для клавиш и пинга
       this.dataChannel = this.pc.createDataChannel('mbtl-input', {
         ordered: true
       });
 
       this.dataChannel.onopen = () => {
         console.log('MBTL DataChannel connected');
-        // Периодический замер пинга каждые 1.2 сек
         if (this.pingTimer) clearInterval(this.pingTimer);
         this.pingTimer = setInterval(() => {
           if (this.dataChannel && this.dataChannel.readyState === 'open') {
@@ -322,6 +350,39 @@ class MBTLClient {
         this.updateControlIndicator();
       };
 
+      // Открываем мгновенный SSE push-канал для получения SDP Answer
+      let sseReceived = false;
+      try {
+        if (this.sse) {
+          try { this.sse.close(); } catch(e) {}
+        }
+        this.sse = new EventSource(`https://ntfy.sh/mbtl_47r_ans_${this.clientId}/sse`);
+        this.sse.onmessage = async (evt) => {
+          if (sseReceived) return;
+          try {
+            const raw = JSON.parse(evt.data);
+            if (raw.event === 'message') {
+              const payload = JSON.parse(raw.message);
+              if (payload.answer) {
+                sseReceived = true;
+                if (this.sse) { this.sse.close(); this.sse = null; }
+                if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
+                await this.pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
+                this.role = payload.role || 'spectator';
+                this.inQueue = false;
+                this.isBlockedByHost = Boolean(payload.is_blocked);
+                this.updateControlIndicator();
+                console.log('[+] WebRTC Answer принят через мгновенный SSE push!');
+              }
+            }
+          } catch (e) {
+            console.warn('SSE message parse error:', e);
+          }
+        };
+      } catch (e) {
+        console.warn('EventSource not supported:', e);
+      }
+
       // Создаем SDP Offer
       const offer = await this.pc.createOffer({
         offerToReceiveVideo: true,
@@ -329,20 +390,21 @@ class MBTLClient {
       });
       await this.pc.setLocalDescription(offer);
 
-      // Ожидаем завершения сбора кандидатов (до 7.5 сек для мобильных сетей)
+      // Сбор кандидатов Anycast STUN (выходим мгновенно при нахождении srflx)
       await new Promise(resolve => {
-        if (this.pc.iceGatheringState === 'complete') {
-          resolve();
-        } else {
-          const checkGathering = () => {
-            if (this.pc.iceGatheringState === 'complete') {
-              this.pc.removeEventListener('icegatheringstatechange', checkGathering);
-              resolve();
-            }
-          };
-          this.pc.addEventListener('icegatheringstatechange', checkGathering);
-          setTimeout(resolve, 7500); // 7.5 сек для надежного сбора публичного IP на мобильной сети
-        }
+        let isDone = false;
+        const done = () => {
+          if (!isDone) {
+            isDone = true;
+            resolve();
+          }
+        };
+        this.pc.onicecandidate = (e) => {
+          if (e.candidate && (e.candidate.type === 'srflx' || (e.candidate.candidate && e.candidate.candidate.includes('srflx')))) {
+            setTimeout(done, 250);
+          }
+        };
+        setTimeout(done, 1500); // максимум 1.5 сек
       });
 
       if (overlayEl) {
@@ -352,59 +414,103 @@ class MBTLClient {
         `;
       }
 
-      // Отправляем оффер на сервер
-      const joinRes = await fetch(`${this.apiBase}/join`, {
+      const offerPayload = {
+        clientId: this.clientId,
+        time: Date.now(),
+        offer: {
+          sdp: this.pc.localDescription.sdp,
+          type: this.pc.localDescription.type
+        }
+      };
+
+      // 1. Мгновенная прямая отправка хосту через ntfy (push)
+      fetch('https://ntfy.sh/mbtl_47r_offers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientId: this.clientId,
-          offer: {
-            sdp: this.pc.localDescription.sdp,
-            type: this.pc.localDescription.type
-          }
-        })
-      });
+        body: JSON.stringify(offerPayload)
+      }).catch(() => {});
 
-      if (!joinRes.ok) {
-        throw new Error('Ошибка регистрации оффера на сервере');
-      }
+      // 2. Резервная отправка на воркер
+      fetch(`${this.apiBase}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(offerPayload)
+      }).catch(() => {});
 
       if (overlayEl) {
         overlayEl.innerHTML = `
           <div style="font-size: 14px; color: #00ffcc; margin-bottom: 6px;">[3/3] ОЖИДАНИЕ ХОСТА...</div>
-          <div style="color: #aaa; font-size: 11px;">Хост на ПК формирует поток и открывает P2P...</div>
+          <div style="color: #aaa; font-size: 11px;">Открытие P2P прямого туннеля (60 FPS)...</div>
         `;
       }
 
-      // Опрашиваем SDP Answer
+      // Резервный опрос ответа (если сеть блокирует SSE)
       let attempts = 0;
       this.pollTimer = setInterval(async () => {
+        if (sseReceived) {
+          clearInterval(this.pollTimer);
+          this.pollTimer = null;
+          return;
+        }
+
         attempts++;
         if (overlayEl && attempts > 1) {
           const subText = overlayEl.querySelector('div:last-child');
-          if (subText) subText.textContent = `Ожидание ответа хоста (${attempts}/35)...`;
+          if (subText) subText.textContent = `Ожидание ответа хоста (${attempts}/25)...`;
         }
 
-        if (attempts > 35) {
+        if (attempts > 25) {
           clearInterval(this.pollTimer);
           this.pollTimer = null;
+          if (this.sse) { this.sse.close(); this.sse = null; }
           if (overlayEl) {
             overlayEl.innerHTML = `
               <div style="font-size: 14px; color: #ff5555; margin-bottom: 6px;">⚠ ХОСТ НЕ ОТВЕТИЛ</div>
-              <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">Убедитесь, что <b>start_host.bat</b> запущен на ПК.</div>
+              <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">Убедитесь, что <b>start_host.bat</b> запущен на ПК и VPN выключен.</div>
               <button class="win-btn" onclick="window.mbtlClient.connect()">Повторить</button>
             `;
           }
           return;
         }
 
+        // Проверяем ntfy poll
+        try {
+          const pollRes = await fetch(`https://ntfy.sh/mbtl_47r_ans_${encodeURIComponent(this.clientId)}/json?poll=1`, { cache: 'no-store' });
+          if (pollRes.ok) {
+            const text = await pollRes.text();
+            const lines = text.trim().split('\n').filter(Boolean);
+            if (lines.length > 0) {
+              const raw = JSON.parse(lines[lines.length - 1]);
+              if (raw.event === 'message') {
+                const data = JSON.parse(raw.message);
+                if (data.answer && !sseReceived) {
+                  sseReceived = true;
+                  if (this.sse) { this.sse.close(); this.sse = null; }
+                  clearInterval(this.pollTimer);
+                  this.pollTimer = null;
+                  await this.pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                  this.role = data.role || 'spectator';
+                  this.inQueue = false;
+                  this.isBlockedByHost = Boolean(data.is_blocked);
+                  this.updateControlIndicator();
+                  console.log('[+] WebRTC Answer принят через ntfy poll!');
+                  return;
+                }
+              }
+            }
+          }
+        } catch (e) {}
+
+        // Резервная проверка через воркер
         try {
           const checkRes = await fetch(`${this.apiBase}/client_pull?clientId=${encodeURIComponent(this.clientId)}`, {
             cache: 'no-store'
           });
           if (checkRes.ok) {
             const data = await checkRes.json();
-            if (data.ready && data.answer) {
+            if (data.ready && data.answer && !sseReceived) {
+              sseReceived = true;
+              if (this.sse) { this.sse.close(); this.sse = null; }
               clearInterval(this.pollTimer);
               this.pollTimer = null;
               await this.pc.setRemoteDescription(new RTCSessionDescription(data.answer));
@@ -412,13 +518,12 @@ class MBTLClient {
               this.inQueue = false;
               this.isBlockedByHost = Boolean(data.is_blocked);
               this.updateControlIndicator();
-              console.log('WebRTC Answer accepted! Role: Spectator');
+              console.log('[+] WebRTC Answer принят через воркер!');
+              return;
             }
           }
-        } catch (e) {
-          console.warn('Poll answer check error:', e);
-        }
-      }, 1000);
+        } catch (e) {}
+      }, 700);
 
     } catch (err) {
       console.error('Connection error:', err);
@@ -631,6 +736,10 @@ class MBTLClient {
   }
 
   disconnect() {
+    if (this.sse) {
+      try { this.sse.close(); } catch(e) {}
+      this.sse = null;
+    }
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
