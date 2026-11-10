@@ -298,9 +298,9 @@ class MBTLClient {
 
     if (roleEl) {
       if (this.role === 'player2') {
-        roleEl.innerHTML = '<span style="color: #00ffcc; font-weight: bold;">[ ИГРОК 2 ]</span>';
+        roleEl.innerHTML = `<span style="color: #00ffcc; font-weight: bold;">[ ИГРОК 2: #${this.clientId} ]</span>`;
       } else {
-        roleEl.innerHTML = '<span style="color: #ffffaa;">[ ЗРИТЕЛЬ ]</span>';
+        roleEl.innerHTML = `<span style="color: #ffffaa;">[ ЗРИТЕЛЬ: #${this.clientId} ]</span>`;
       }
     }
 
@@ -308,7 +308,7 @@ class MBTLClient {
       if (this.role !== 'player2') {
         lockEl.innerHTML = '<span style="color: #aaa;">Режим просмотра</span>';
       } else if (this.isBlockedByHost) {
-        lockEl.innerHTML = '<span style="color: #ff5555; font-weight: bold;">🔒 УПРАВЛЕНИЕ ЗАБЛОКИРОВАНО ХОСТОМ</span>';
+        lockEl.innerHTML = '<span style="color: #ff5555; font-weight: bold;">🔒 ЗАБЛОКИРОВАНО ХОСТОМ (Ожидание F9)</span>';
       } else {
         lockEl.innerHTML = '<span style="color: #00ff66; font-weight: bold;">🎮 УПРАВЛЕНИЕ АКТИВНО</span>';
       }
@@ -317,7 +317,7 @@ class MBTLClient {
 
   handleKeyDown(e) {
     const win = document.getElementById('win-mbtl');
-    if (!win || win.style.display === 'none' || !win.classList.contains('active')) {
+    if (!win || win.style.display === 'none') {
       return;
     }
 

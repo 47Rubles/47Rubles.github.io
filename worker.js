@@ -90,15 +90,19 @@ export default {
             });
           }
 
-          // Сохраняем оффер клиента на 120 секунд
-          await env.GUESTBOOK_KV.put(`mbtl_offer_${clientId}`, JSON.stringify(offer), { expirationTtl: 120 });
+          // Атомарно сохраняем оффер в общую карту ожидающих подключений
+          let map = await env.GUESTBOOK_KV.get("mbtl_offers_map", "json") || {};
+          map[clientId] = { offer, time: Date.now() };
 
-          // Добавляем clientId в список ожидающих
-          let pending = await env.GUESTBOOK_KV.get("mbtl_pending_clients", "json") || [];
-          if (!pending.includes(clientId)) {
-            pending.push(clientId);
-            await env.GUESTBOOK_KV.put("mbtl_pending_clients", JSON.stringify(pending), { expirationTtl: 120 });
+          // Удаляем старые зависшие запросы (старше 60 секунд)
+          const now = Date.now();
+          for (const [k, v] of Object.entries(map)) {
+            if (now - (v.time || 0) > 60000) {
+              delete map[k];
+            }
           }
+
+          await env.GUESTBOOK_KV.put("mbtl_offers_map", JSON.stringify(map), { expirationTtl: 120 });
 
           return new Response(JSON.stringify({ success: true, queued: true }), {
             status: 200,
@@ -115,19 +119,13 @@ export default {
       // 1.4 GET /api/mbtl/host_pull - Хост забирает новые офферы клиентов
       if (subpath === "host_pull" && request.method === "GET") {
         try {
-          let pending = await env.GUESTBOOK_KV.get("mbtl_pending_clients", "json") || [];
+          const map = await env.GUESTBOOK_KV.get("mbtl_offers_map", "json") || {};
           const offers = [];
 
-          for (const clientId of pending) {
-            const offer = await env.GUESTBOOK_KV.get(`mbtl_offer_${clientId}`, "json");
-            if (offer) {
-              offers.push({ clientId, offer });
+          for (const [clientId, data] of Object.entries(map)) {
+            if (data && data.offer) {
+              offers.push({ clientId, offer: data.offer });
             }
-          }
-
-          // Очищаем список забранных
-          if (pending.length > 0) {
-            await env.GUESTBOOK_KV.put("mbtl_pending_clients", JSON.stringify([]), { expirationTtl: 120 });
           }
 
           return new Response(JSON.stringify({ offers }), {
@@ -155,8 +153,25 @@ export default {
           }
 
           await env.GUESTBOOK_KV.put(`mbtl_answer_${clientId}`, JSON.stringify({ answer, role: role || "spectator" }), { expirationTtl: 120 });
-          // Удаляем уже обработанный оффер
-          await env.GUESTBOOK_KV.delete(`mbtl_offer_${clientId}`);
+
+          // Удаляем обработанный оффер из карты
+          let map = await env.GUESTBOOK_KV.get("mbtl_offers_map", "json") || {};
+          if (map[clientId]) {
+            delete map[clientId];
+            await env.GUESTBOOK_KV.put("mbtl_offers_map", JSON.stringify(map), { expirationTtl: 120 });
+          }
+
+          return new Response(JSON.stringify({ success: true }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
+          });
+        } catch (err) {
+          return new Response(JSON.stringify({ error: err.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
+          });
+        }
+      }
 
           return new Response(JSON.stringify({ success: true }), {
             status: 200,
