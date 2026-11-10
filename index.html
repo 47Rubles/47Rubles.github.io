@@ -527,6 +527,7 @@
       <span class="menu-item" id="mbtl-quality-btn" onclick="window.mbtlClient.toggleQuality()">540p (Быстро)</span>
       <span class="menu-item" id="mbtl-pad-toggle" onclick="window.mbtlClient.toggleGamepad()">📱 Геймпад</span>
       <span class="menu-item" id="mbtl-fs-btn" onclick="window.mbtlClient.toggleFullscreen()">⛶ Фулскрин</span>
+      <span class="menu-item" style="color: #000080; font-weight: bold;" onclick="window.mbtlClient.runDiagnostics()">🔍 Диагностика</span>
       <span class="menu-item" onclick="alert('Melty Blood: Type Lumina Remote Play.\n\nПрямая трансляция боя с ПК автора без звука.\nУправление: Стрелки/WASD + NumPad/JUIO, либо сенсорный экран на телефоне.\n\nГорячие клавиши хоста:\nF9 — Блокировка/разблокировка управления P2\nF10 — Смена игрока (передать ход следующему зрителю)')">Справка</span>
     </div>
     <div class="window-body mbtl-container">
@@ -680,7 +681,7 @@
   <script src="js/dialogue.js"></script>
   <script src="js/gallery.js"></script>
   <script src="js/star.js"></script>
-  <script src="js/mbtl.js"></script>
+  <script src="js/mbtl.js?v=2.1"></script>
 
   <script>
     function updateClock() {

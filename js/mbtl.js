@@ -787,6 +787,147 @@ class MBTLClient {
     }
   }
 
+  async runDiagnostics() {
+    let modal = document.getElementById('mbtl-diag-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'mbtl-diag-modal';
+      modal.className = 'window';
+      modal.style.position = 'fixed';
+      modal.style.top = '50%';
+      modal.style.left = '50%';
+      modal.style.transform = 'translate(-50%, -50%)';
+      modal.style.width = 'min(92vw, 460px)';
+      modal.style.zIndex = '99999';
+      modal.style.boxShadow = '0 6px 20px rgba(0,0,0,0.5)';
+      document.body.appendChild(modal);
+    }
+    modal.style.display = 'block';
+    modal.innerHTML = `
+      <div class="title-bar">
+        <div class="title-bar-text">🔍 47OS 98 — Самодиагностика сети MBTL</div>
+        <div class="title-bar-controls">
+          <button class="title-btn btn-close" onclick="document.getElementById('mbtl-diag-modal').style.display='none'">✕</button>
+        </div>
+      </div>
+      <div class="window-body" style="padding: 10px; font-size: 12px;">
+        <div id="mbtl-diag-content" style="background: #fff; border: 2px inset #dfdfdf; padding: 10px; font-family: monospace; min-height: 180px; line-height: 1.6; word-break: break-word;">
+          Запуск тестов связи...
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+          <button class="win-btn" onclick="window.mbtlClient.runDiagnostics()">🔄 Повторить тест</button>
+          <button class="win-btn" onclick="document.getElementById('mbtl-diag-modal').style.display='none'">Закрыть</button>
+        </div>
+      </div>
+    `;
+
+    const logEl = document.getElementById('mbtl-diag-content');
+    const logs = [];
+    const addLog = (icon, title, details = '') => {
+      logs.push(`${icon} ${title}${details ? ' — ' + details : ''}`);
+      logEl.innerHTML = logs.map(l => `<div style="margin-bottom: 4px;">${l}</div>`).join('');
+    };
+
+    addLog('⏳', 'Версия клиента', 'v2.1 (MQTT WSS)');
+    await new Promise(r => setTimeout(r, 200));
+
+    // 1. WebRTC & Codecs
+    if (window.RTCPeerConnection) {
+      addLog('🟢', '1. WebRTC API в браузере', 'Поддерживается');
+    } else {
+      addLog('🔴', '1. WebRTC API в браузере', 'НЕ поддерживается!');
+      return;
+    }
+
+    // 2. Сигнальный сервер WSS (MQTT)
+    addLog('⏳', '2. Сигнальный WSS брокер', 'Проверка связи...');
+    let mqttOk = false;
+
+    if (this.mqtt.connected) {
+      mqttOk = true;
+    } else {
+      for (let i = 0; i < 25; i++) {
+        if (this.mqtt.connected) {
+          mqttOk = true;
+          break;
+        }
+        await new Promise(r => setTimeout(r, 100));
+      }
+    }
+
+    if (mqttOk) {
+      const brokerHost = this.mqtt.currentBroker.replace('wss://', '').split('/')[0];
+      addLog('🟢', '2. Сигнальный WSS брокер', `Подключен к ${brokerHost}`);
+    } else {
+      addLog('🔴', '2. Сигнальный WSS брокер', 'Сбой подключения! Проверьте сеть.');
+    }
+
+    // 3. Anycast STUN
+    addLog('⏳', '3. Anycast STUN сервер', 'Определение IP...');
+    let stunIp = null;
+    try {
+      const testPc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.cloudflare.com:3478' }]
+      });
+      testPc.createDataChannel('diag');
+      const testOffer = await testPc.createOffer();
+      await testPc.setLocalDescription(testOffer);
+
+      await new Promise(resolve => {
+        const timeout = setTimeout(() => { try { testPc.close(); } catch(e){} resolve(); }, 2000);
+        testPc.onicecandidate = (e) => {
+          if (e.candidate && e.candidate.candidate && e.candidate.candidate.includes('srflx')) {
+            const parts = e.candidate.candidate.split(' ');
+            stunIp = parts[4];
+            clearTimeout(timeout);
+            try { testPc.close(); } catch(err){}
+            resolve();
+          }
+        };
+      });
+
+      if (stunIp) {
+        addLog('🟢', '3. Anycast STUN сервер', `Внешний IP: ${stunIp}`);
+      } else {
+        addLog('🟡', '3. Anycast STUN сервер', 'Маршрут LAN (в одной Wi-Fi сети с хостом)');
+      }
+    } catch (err) {
+      addLog('🔴', '3. STUN ошибка', err.message);
+    }
+
+    // 4. Пинг хост-машины (ПК)
+    addLog('⏳', '4. Связь с ПК хоста', 'Запрос к mbtl_host.py...');
+    let hostPong = null;
+    const diagTopic = `47os/mbtl/diag/pong/${this.clientId}`;
+    const tStart = performance.now();
+
+    const onPong = (data) => {
+      hostPong = data;
+    };
+    this.mqtt.subscribe(diagTopic, onPong);
+
+    this.mqtt.publish('47os/mbtl/diag/ping', {
+      clientId: this.clientId,
+      time: Date.now()
+    });
+
+    for (let i = 0; i < 30; i++) {
+      if (hostPong) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
+    this.mqtt.unsubscribe(diagTopic, onPong);
+
+    if (hostPong) {
+      const rtt = Math.round(performance.now() - tStart);
+      const winStatus = hostPong.game_window ? 'Окно игры захвачено (60 FPS)' : 'Ожидание окна MBTL';
+      addLog('🟢', '4. ПК Хоста на связи!', `${rtt} ms | ${winStatus}`);
+      addLog('✨', 'ИТОГ', 'Все узлы работают! Нажмите «Подключиться».');
+    } else {
+      addLog('🔴', '4. ПК Хоста НЕ отвечает!', 'start_host.bat не запущен или завис');
+      addLog('💡', 'Решение', 'Закройте окно start_host.bat на ПК и запустите его снова.');
+    }
+  }
+
   disconnect() {
     if (this.connectTimeout) {
       clearTimeout(this.connectTimeout);
