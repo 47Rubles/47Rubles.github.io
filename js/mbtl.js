@@ -12,6 +12,8 @@ class MBTLClient {
     this.dataChannel = null;
     this.pollTimer = null;
     this.statusCheckTimer = null;
+    this.pingTimer = null;
+    this.currentPing = null;
     
     this.role = 'guest'; // 'player2' | 'spectator' | 'guest'
     this.isBlockedByHost = false;
@@ -152,6 +154,18 @@ class MBTLClient {
 
       this.dataChannel.onopen = () => {
         console.log('MBTL DataChannel connected');
+        // Запуск периодического замера пинга каждые 1.2 сек
+        if (this.pingTimer) clearInterval(this.pingTimer);
+        this.pingTimer = setInterval(() => {
+          if (this.dataChannel && this.dataChannel.readyState === 'open') {
+            try {
+              this.dataChannel.send(JSON.stringify({
+                type: 'ping',
+                t: performance.now()
+              }));
+            } catch (e) {}
+          }
+        }, 1200);
       };
 
       this.dataChannel.onmessage = (event) => {
@@ -278,7 +292,26 @@ class MBTLClient {
   }
 
   handleServerMessage(msg) {
-    if (msg.type === 'status') {
+    if (msg.type === 'pong') {
+      const rtt = Math.round(performance.now() - msg.t);
+      this.currentPing = rtt;
+      const pingEl = document.getElementById('mbtl-win-ping');
+      if (pingEl) {
+        let color = '#00ff66';
+        if (rtt > 150) color = '#ff5555';
+        else if (rtt > 70) color = '#ffff55';
+        pingEl.innerHTML = `⚡ Пинг: <span style="color: ${color}; font-weight: bold;">${rtt} ms</span>`;
+      }
+      // Отправляем текущий замер пинга хосту
+      if (this.dataChannel && this.dataChannel.readyState === 'open') {
+        try {
+          this.dataChannel.send(JSON.stringify({
+            type: 'ping_stat',
+            ping: rtt
+          }));
+        } catch (e) {}
+      }
+    } else if (msg.type === 'status') {
       this.isBlockedByHost = Boolean(msg.blocked);
       this.updateControlIndicator();
     } else if (msg.type === 'role') {
@@ -388,6 +421,15 @@ class MBTLClient {
       clearInterval(this.pollTimer);
       this.pollTimer = null;
     }
+    if (this.pingTimer) {
+      clearInterval(this.pingTimer);
+      this.pingTimer = null;
+    }
+    const pingEl = document.getElementById('mbtl-win-ping');
+    if (pingEl) {
+      pingEl.textContent = '⚡ Пинг: -- ms';
+    }
+    this.currentPing = null;
     this.releaseAllKeys();
     if (this.dataChannel) {
       try { this.dataChannel.close(); } catch(e) {}

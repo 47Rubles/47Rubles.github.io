@@ -828,12 +828,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
   background: #000080;
   color: #fff;
   padding: 4px 8px;
   font-size: 11px;
   font-family: var(--font-mono);
   box-sizing: border-box;
+}
+
+#mbtl-win-ping {
+  color: #ffff77;
+  white-space: nowrap;
 }
 
 .mbtl-screen-box {
