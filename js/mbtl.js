@@ -68,23 +68,29 @@ class MBTLClient {
   }
 
   setupTouchGamepad() {
-    const gp = document.getElementById('mbtl-gamepad');
-    if (!gp) return;
+    const win = document.getElementById('win-mbtl');
+    if (!win) return;
 
-    // Автоматически показать сенсорный геймпад на мобильных устройствах
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768) {
-      gp.style.display = 'flex';
+    const arena = document.getElementById('mbtl-arena');
+    const isTouch = ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768);
+
+    // На ПК по умолчанию скрываем сенсорные крылья геймпада
+    if (!isTouch && arena) {
+      arena.classList.add('mbtl-wings-hidden');
     }
 
-    const buttons = gp.querySelectorAll('button[data-key]');
+    const buttons = win.querySelectorAll('button[data-key]');
     buttons.forEach(btn => {
       const key = btn.getAttribute('data-key');
+      let isTouched = false;
 
       const press = (e) => {
+        if (e.type === 'touchstart') isTouched = true;
+        if (e.type === 'mousedown' && isTouched) return;
         e.preventDefault();
         btn.classList.add('mbtl-btn-active');
-        if ('vibrate' in navigator) {
-          try { navigator.vibrate(15); } catch(err) {}
+        if ('vibrate' in navigator && e.type === 'touchstart') {
+          try { navigator.vibrate(12); } catch(err) {}
         }
         if (this.role === 'player2' && !this.isBlockedByHost) {
           if (!this.pressedKeys.has(key)) {
@@ -96,6 +102,9 @@ class MBTLClient {
       };
 
       const release = (e) => {
+        if (e.type === 'touchend' || e.type === 'touchcancel') {
+          setTimeout(() => { isTouched = false; }, 350);
+        }
         e.preventDefault();
         btn.classList.remove('mbtl-btn-active');
         if (this.pressedKeys.has(key)) {
@@ -115,9 +124,33 @@ class MBTLClient {
   }
 
   toggleGamepad() {
-    const gp = document.getElementById('mbtl-gamepad');
-    if (gp) {
-      gp.style.display = gp.style.display === 'none' ? 'flex' : 'none';
+    const arena = document.getElementById('mbtl-arena');
+    if (arena) {
+      arena.classList.toggle('mbtl-wings-hidden');
+    }
+  }
+
+  toggleFullscreen() {
+    const win = document.getElementById('win-mbtl');
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      const target = win || document.documentElement;
+      if (target.requestFullscreen) {
+        target.requestFullscreen().catch(() => {});
+      } else if (target.webkitRequestFullscreen) {
+        target.webkitRequestFullscreen();
+      }
+      if (window.winManager && win) {
+        const winData = window.winManager.windows.get('win-mbtl');
+        if (winData && !winData.maximized) {
+          window.winManager.toggleMaximize('win-mbtl');
+        }
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
     }
   }
 
@@ -225,14 +258,14 @@ class MBTLClient {
     try {
       this.disconnect(); // Сброс старой сессии
 
-      // Только проверенные стабильные Google STUN серверы
+      // Быстрые Anycast STUN серверы (Cloudflare, Nextcloud, Sipgate + резерв Google)
       this.pc = new RTCPeerConnection({
         iceServers: [
+          { urls: 'stun:stun.cloudflare.com:3478' },
+          { urls: 'stun:stun.nextcloud.com:3478' },
+          { urls: 'stun:stun.sipgate.net:3478' },
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' },
-          { urls: 'stun:stun3.l.google.com:19302' },
-          { urls: 'stun:stun4.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' }
         ]
       });
 

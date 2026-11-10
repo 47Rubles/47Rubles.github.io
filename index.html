@@ -526,6 +526,7 @@
       <span class="menu-item" onclick="window.mbtlClient.disconnect()">Отключиться</span>
       <span class="menu-item" id="mbtl-quality-btn" onclick="window.mbtlClient.toggleQuality()">540p (Быстро)</span>
       <span class="menu-item" id="mbtl-pad-toggle" onclick="window.mbtlClient.toggleGamepad()">📱 Геймпад</span>
+      <span class="menu-item" id="mbtl-fs-btn" onclick="window.mbtlClient.toggleFullscreen()">⛶ Фулскрин</span>
       <span class="menu-item" onclick="alert('Melty Blood: Type Lumina Remote Play.\n\nПрямая трансляция боя с ПК автора без звука.\nУправление: Стрелки/WASD + NumPad/JUIO, либо сенсорный экран на телефоне.\n\nГорячие клавиши хоста:\nF9 — Блокировка/разблокировка управления P2\nF10 — Смена игрока (передать ход следующему зрителю)')">Справка</span>
     </div>
     <div class="window-body mbtl-container">
@@ -536,56 +537,60 @@
         <div id="mbtl-win-lock">👁 Только просмотр</div>
         <div id="mbtl-win-ping">⚡ Пинг: -- ms</div>
         <div id="mbtl-win-queue">Очередь: 0</div>
+        <button id="mbtl-queue-btn" class="win-btn mbtl-queue-btn" onclick="window.mbtlClient.toggleQueue()" style="display: none;">
+          ⚔ Встать в очередь на бой
+        </button>
       </div>
 
-      <!-- Video Screen -->
-      <div class="mbtl-screen-box">
-        <video id="mbtl-video" autoplay playsinline muted></video>
-        <div class="mbtl-screen-overlay" id="mbtl-screen-overlay">
-          <div style="font-size: 15px; margin-bottom: 6px;">⚫ ХОСТ ОФФЛАЙН</div>
-          <div style="color: #aaa; font-size: 11px;">
-            Хост-скрипт на ПК автора сейчас выключен.<br>
-            Как только 47Rubles запустит игру, вы сможете подключиться!
+      <!-- MBTL Arena: D-Pad (Left), Screen (Center), Action Buttons (Right) -->
+      <div class="mbtl-arena" id="mbtl-arena">
+        <!-- Left Wing: Virtual D-Pad -->
+        <div class="mbtl-wing mbtl-wing-left" id="mbtl-wing-left">
+          <div class="mbtl-dpad">
+            <button class="win-btn mbtl-pad-btn pad-up" data-key="ArrowUp" type="button" aria-label="Вверх">▲</button>
+            <div class="mbtl-dpad-middle">
+              <button class="win-btn mbtl-pad-btn pad-left" data-key="ArrowLeft" type="button" aria-label="Влево">◄</button>
+              <div class="mbtl-dpad-center"></div>
+              <button class="win-btn mbtl-pad-btn pad-right" data-key="ArrowRight" type="button" aria-label="Вправо">►</button>
+            </div>
+            <button class="win-btn mbtl-pad-btn pad-down" data-key="ArrowDown" type="button" aria-label="Вниз">▼</button>
           </div>
         </div>
-      </div>
 
-      <!-- Touch Virtual Gamepad for Mobile -->
-      <div class="mbtl-gamepad" id="mbtl-gamepad" style="display: none;">
-        <!-- D-Pad (Left) -->
-        <div class="mbtl-dpad">
-          <button class="win-btn mbtl-pad-btn pad-up" data-key="ArrowUp">▲</button>
-          <div class="mbtl-dpad-middle">
-            <button class="win-btn mbtl-pad-btn pad-left" data-key="ArrowLeft">◄</button>
-            <div class="mbtl-dpad-center"></div>
-            <button class="win-btn mbtl-pad-btn pad-right" data-key="ArrowRight">►</button>
+        <!-- Center: Screen Box with Video Stream -->
+        <div class="mbtl-screen-box" id="mbtl-screen-box">
+          <video id="mbtl-video" autoplay playsinline muted></video>
+          <div class="mbtl-screen-overlay" id="mbtl-screen-overlay">
+            <div style="font-size: 15px; margin-bottom: 6px;">⚫ ХОСТ ОФФЛАЙН</div>
+            <div style="color: #aaa; font-size: 11px;">
+              Хост-скрипт на ПК автора сейчас выключен.<br>
+              Как только 47Rubles запустит игру, вы сможете подключиться!
+            </div>
           </div>
-          <button class="win-btn mbtl-pad-btn pad-down" data-key="ArrowDown">▼</button>
         </div>
 
-        <!-- Action Buttons (Right) -->
-        <div class="mbtl-actions">
-          <div class="mbtl-action-row">
-            <button class="win-btn mbtl-action-btn btn-a" data-key="Numpad7">A (7)</button>
-            <button class="win-btn mbtl-action-btn btn-b" data-key="Numpad8">B (8)</button>
-          </div>
-          <div class="mbtl-action-row">
-            <button class="win-btn mbtl-action-btn btn-d" data-key="Numpad4">D (Щит)</button>
-            <button class="win-btn mbtl-action-btn btn-c" data-key="Numpad9">C (9)</button>
+        <!-- Right Wing: Virtual Action Buttons -->
+        <div class="mbtl-wing mbtl-wing-right" id="mbtl-wing-right">
+          <div class="mbtl-actions">
+            <div class="mbtl-action-row">
+              <button class="win-btn mbtl-action-btn btn-a" data-key="Numpad7" type="button">A (7)</button>
+              <button class="win-btn mbtl-action-btn btn-b" data-key="Numpad8" type="button">B (8)</button>
+            </div>
+            <div class="mbtl-action-row">
+              <button class="win-btn mbtl-action-btn btn-d" data-key="Numpad4" type="button">D (4)</button>
+              <button class="win-btn mbtl-action-btn btn-c" data-key="Numpad9" type="button">C (9)</button>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Controls & Guide -->
-      <div class="mbtl-controls-box">
+      <div class="mbtl-controls-box" id="mbtl-controls-box">
         <div class="mbtl-controls-header">
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span style="font-weight: bold; color: #000080;">🎮 Управление Игрока 2:</span>
             <span style="font-size: 10px; color: #555;">(Стрелки / WASD + NumPad / JUIO)</span>
           </div>
-          <button id="mbtl-queue-btn" class="win-btn mbtl-queue-btn" onclick="window.mbtlClient.toggleQueue()" style="display: none;">
-            ⚔ Встать в очередь на бой
-          </button>
         </div>
         <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
           <div>
