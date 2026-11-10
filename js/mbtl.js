@@ -44,6 +44,7 @@ class MiniMQTTClient {
     }
 
     this.ws.onopen = () => {
+      this.failCount = 0;
       this.sendConnect();
     };
 
@@ -52,7 +53,11 @@ class MiniMQTTClient {
     };
 
     this.ws.onerror = () => {
-      this.brokerIdx = (this.brokerIdx + 1) % this.brokers.length;
+      this.failCount = (this.failCount || 0) + 1;
+      if (this.failCount >= 5) {
+        this.brokerIdx = (this.brokerIdx + 1) % this.brokers.length;
+        this.failCount = 0;
+      }
     };
 
     this.ws.onclose = () => {
@@ -313,10 +318,11 @@ class MBTLClient {
     if (!win) return;
 
     const arena = document.getElementById('mbtl-arena');
-    const isTouch = ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768);
+    const isTouch = ('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) || window.innerWidth < 768);
+    const isLandscapeMobile = (window.innerWidth > window.innerHeight && (isTouch || window.innerHeight <= 650));
 
-    // На ПК по умолчанию скрываем сенсорные крылья геймпада
-    if (!isTouch && arena) {
+    // На ПК по умолчанию скрываем сенсорные крылья геймпада (на телефонах и в горизонтальном формате оставляем активными)
+    if (!isTouch && !isLandscapeMobile && arena) {
       arena.classList.add('mbtl-wings-hidden');
     }
 
@@ -871,7 +877,7 @@ class MBTLClient {
       logEl.innerHTML = logs.map(l => `<div style="margin-bottom: 4px;">${l}</div>`).join('');
     };
 
-    addLog('⏳', 'Версия клиента', 'v2.3 (MQTT WSS + UPnP & Unicast)');
+    addLog('⏳', 'Версия клиента', 'v2.4 (MQTT WSS + UPnP & BUNDLE Fix)');
     await new Promise(r => setTimeout(r, 200));
 
     // 1. WebRTC & Codecs
