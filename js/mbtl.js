@@ -524,7 +524,7 @@ class MBTLClient {
       });
       await this.pc.setLocalDescription(offer);
 
-      // Сбор кандидатов Anycast STUN
+      // Сбор кандидатов Anycast STUN с поддержкой Trickle ICE
       await new Promise(resolve => {
         let isDone = false;
         const done = () => {
@@ -533,12 +533,37 @@ class MBTLClient {
             resolve();
           }
         };
-        this.pc.onicecandidate = (e) => {
-          if (e.candidate && (e.candidate.type === 'srflx' || (e.candidate.candidate && e.candidate.candidate.includes('srflx')))) {
-            setTimeout(done, 200);
+
+        const onGatherChange = () => {
+          if (this.pc && this.pc.iceGatheringState === 'complete') {
+            done();
           }
         };
-        setTimeout(done, 1200);
+        this.pc.addEventListener('icegatheringstatechange', onGatherChange);
+
+        this.pc.onicecandidate = (e) => {
+          if (e.candidate) {
+            // Trickle ICE: транслируем кандидат на хост
+            this.mqtt.publish(`47os/mbtl/candidates/${this.clientId}`, {
+              clientId: this.clientId,
+              candidate: e.candidate.toJSON ? e.candidate.toJSON() : {
+                candidate: e.candidate.candidate,
+                sdpMid: e.candidate.sdpMid,
+                sdpMLineIndex: e.candidate.sdpMLineIndex
+              }
+            });
+
+            // При обнаружении публичного маршрута (srflx) ждём 200 мс на финализацию
+            if (e.candidate.type === 'srflx' || (e.candidate.candidate && e.candidate.candidate.includes('srflx'))) {
+              setTimeout(done, 200);
+            }
+          } else {
+            // e.candidate === null означает завершение сбора
+            done();
+          }
+        };
+
+        setTimeout(done, 1500);
       });
 
       if (overlayEl) {
@@ -828,7 +853,7 @@ class MBTLClient {
       logEl.innerHTML = logs.map(l => `<div style="margin-bottom: 4px;">${l}</div>`).join('');
     };
 
-    addLog('⏳', 'Версия клиента', 'v2.1 (MQTT WSS)');
+    addLog('⏳', 'Версия клиента', 'v2.2 (MQTT WSS + Trickle ICE)');
     await new Promise(r => setTimeout(r, 200));
 
     // 1. WebRTC & Codecs
