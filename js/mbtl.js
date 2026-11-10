@@ -175,9 +175,15 @@ class MBTLClient {
     try {
       let data = null;
 
-      // 1. Мгновенная проверка через ntfy (без лимитов и квот KV)
+      // 1. Быстрая проверка через ntfy с жестким таймаутом 1.2 сек (защита от зависаний)
       try {
-        const ntfyRes = await fetch('https://ntfy.sh/mbtl_47r_status/json?poll=1', { cache: 'no-store' });
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 1200);
+        const ntfyRes = await fetch('https://ntfy.sh/mbtl_47r_status/json?poll=1', {
+          cache: 'no-store',
+          signal: ctrl.signal
+        });
+        clearTimeout(tid);
         if (ntfyRes.ok) {
           const text = await ntfyRes.text();
           const lines = text.trim().split('\n').filter(Boolean);
@@ -194,10 +200,16 @@ class MBTLClient {
         }
       } catch (e) {}
 
-      // 2. Резервная проверка через воркер
+      // 2. Резервная проверка через воркер с таймаутом 1.5 сек
       if (!data) {
         try {
-          const res = await fetch(`${this.apiBase}/status`, { cache: 'no-store' });
+          const ctrl2 = new AbortController();
+          const tid2 = setTimeout(() => ctrl2.abort(), 1500);
+          const res = await fetch(`${this.apiBase}/status`, {
+            cache: 'no-store',
+            signal: ctrl2.signal
+          });
+          clearTimeout(tid2);
           if (res.ok) {
             const wData = await res.json();
             if (wData.online) data = wData;
@@ -473,9 +485,15 @@ class MBTLClient {
           return;
         }
 
-        // Проверяем ntfy poll
+        // Проверяем ntfy poll (с таймаутом 600мс, защита от блокировки)
         try {
-          const pollRes = await fetch(`https://ntfy.sh/mbtl_47r_ans_${encodeURIComponent(this.clientId)}/json?poll=1`, { cache: 'no-store' });
+          const c1 = new AbortController();
+          const t1 = setTimeout(() => c1.abort(), 600);
+          const pollRes = await fetch(`https://ntfy.sh/mbtl_47r_ans_${encodeURIComponent(this.clientId)}/json?poll=1`, {
+            cache: 'no-store',
+            signal: c1.signal
+          });
+          clearTimeout(t1);
           if (pollRes.ok) {
             const text = await pollRes.text();
             const lines = text.trim().split('\n').filter(Boolean);
@@ -501,11 +519,15 @@ class MBTLClient {
           }
         } catch (e) {}
 
-        // Резервная проверка через воркер
+        // Резервная проверка через воркер (таймаут 800мс)
         try {
+          const c2 = new AbortController();
+          const t2 = setTimeout(() => c2.abort(), 800);
           const checkRes = await fetch(`${this.apiBase}/client_pull?clientId=${encodeURIComponent(this.clientId)}`, {
-            cache: 'no-store'
+            cache: 'no-store',
+            signal: c2.signal
           });
+          clearTimeout(t2);
           if (checkRes.ok) {
             const data = await checkRes.json();
             if (data.ready && data.answer && !sseReceived) {
