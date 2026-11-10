@@ -524,7 +524,9 @@
     <div class="menu-bar">
       <span class="menu-item" onclick="window.mbtlClient.connect()">Подключиться</span>
       <span class="menu-item" onclick="window.mbtlClient.disconnect()">Отключиться</span>
-      <span class="menu-item" onclick="alert('Melty Blood: Type Lumina Remote Play.\n\nПрямая трансляция боя с ПК автора без звука.\nУправление: Стрелки + NumPad.\n\nГорячие клавиши хоста:\nF9 — Блокировка/разблокировка управления P2\nF10 — Смена игрока (передача хода следующему зрителю)')">Справка</span>
+      <span class="menu-item" id="mbtl-quality-btn" onclick="window.mbtlClient.toggleQuality()">540p (Быстро)</span>
+      <span class="menu-item" id="mbtl-pad-toggle" onclick="window.mbtlClient.toggleGamepad()">📱 Геймпад</span>
+      <span class="menu-item" onclick="alert('Melty Blood: Type Lumina Remote Play.\n\nПрямая трансляция боя с ПК автора без звука.\nУправление: Стрелки/WASD + NumPad/JUIO, либо сенсорный экран на телефоне.\n\nГорячие клавиши хоста:\nF9 — Блокировка/разблокировка управления P2\nF10 — Смена игрока (передать ход следующему зрителю)')">Справка</span>
     </div>
     <div class="window-body mbtl-container">
       <!-- Status Top Bar -->
@@ -544,6 +546,32 @@
           <div style="color: #aaa; font-size: 11px;">
             Хост-скрипт на ПК автора сейчас выключен.<br>
             Как только 47Rubles запустит игру, вы сможете подключиться!
+          </div>
+        </div>
+      </div>
+
+      <!-- Touch Virtual Gamepad for Mobile -->
+      <div class="mbtl-gamepad" id="mbtl-gamepad" style="display: none;">
+        <!-- D-Pad (Left) -->
+        <div class="mbtl-dpad">
+          <button class="win-btn mbtl-pad-btn pad-up" data-key="ArrowUp">▲</button>
+          <div class="mbtl-dpad-middle">
+            <button class="win-btn mbtl-pad-btn pad-left" data-key="ArrowLeft">◄</button>
+            <div class="mbtl-dpad-center"></div>
+            <button class="win-btn mbtl-pad-btn pad-right" data-key="ArrowRight">►</button>
+          </div>
+          <button class="win-btn mbtl-pad-btn pad-down" data-key="ArrowDown">▼</button>
+        </div>
+
+        <!-- Action Buttons (Right) -->
+        <div class="mbtl-actions">
+          <div class="mbtl-action-row">
+            <button class="win-btn mbtl-action-btn btn-a" data-key="Numpad7">A (7)</button>
+            <button class="win-btn mbtl-action-btn btn-b" data-key="Numpad8">B (8)</button>
+          </div>
+          <div class="mbtl-action-row">
+            <button class="win-btn mbtl-action-btn btn-d" data-key="Numpad4">D (Щит)</button>
+            <button class="win-btn mbtl-action-btn btn-c" data-key="Numpad9">C (9)</button>
           </div>
         </div>
       </div>

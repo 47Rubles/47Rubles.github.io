@@ -173,18 +173,6 @@ export default {
         }
       }
 
-          return new Response(JSON.stringify({ success: true }), {
-            status: 200,
-            headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
-          });
-        } catch (err) {
-          return new Response(JSON.stringify({ error: err.message }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
-          });
-        }
-      }
-
       // 1.6 GET /api/mbtl/client_pull?clientId=... - Клиент проверяет ответ хоста
       if (subpath === "client_pull" && request.method === "GET") {
         try {

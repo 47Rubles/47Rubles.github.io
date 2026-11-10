@@ -4,7 +4,9 @@
  * - Подключение по умолчанию как Зритель (просмотр без участия)
  * - Кнопка "Встать в очередь на бой" для перехода в бойцы
  * - Двойная раскладка управления: Стрелки/NumPad + WSDA/JUIO
- * - Двусторонний замер пинга в реальном времени
+ * - Сенсорный геймпад (D-Pad + кнопки A, B, C, D) для мобильных телефонов
+ * - Оптимизированный сбор ICE для мобильного интернета и точек доступа
+ * - Переключение качества стрима: 540p (Быстро / Мобильно) и 720p (HD)
  */
 
 class MBTLClient {
@@ -18,6 +20,7 @@ class MBTLClient {
     this.statusCheckTimer = null;
     this.pingTimer = null;
     this.currentPing = null;
+    this.currentQuality = '540p';
     
     this.role = 'spectator'; // 'player2' | 'spectator'
     this.inQueue = false;
@@ -59,6 +62,80 @@ class MBTLClient {
     window.addEventListener('keydown', (e) => this.handleKeyDown(e));
     window.addEventListener('keyup', (e) => this.handleKeyUp(e));
     window.addEventListener('blur', () => this.releaseAllKeys());
+
+    // Инициализация сенсорного геймпада
+    this.setupTouchGamepad();
+  }
+
+  setupTouchGamepad() {
+    const gp = document.getElementById('mbtl-gamepad');
+    if (!gp) return;
+
+    // Автоматически показать сенсорный геймпад на мобильных устройствах
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768) {
+      gp.style.display = 'flex';
+    }
+
+    const buttons = gp.querySelectorAll('button[data-key]');
+    buttons.forEach(btn => {
+      const key = btn.getAttribute('data-key');
+
+      const press = (e) => {
+        e.preventDefault();
+        btn.classList.add('mbtl-btn-active');
+        if ('vibrate' in navigator) {
+          try { navigator.vibrate(15); } catch(err) {}
+        }
+        if (this.role === 'player2' && !this.isBlockedByHost) {
+          if (!this.pressedKeys.has(key)) {
+            this.pressedKeys.add(key);
+            this.sendKey(key, 'down');
+            this.highlightKeyBadge(key, true);
+          }
+        }
+      };
+
+      const release = (e) => {
+        e.preventDefault();
+        btn.classList.remove('mbtl-btn-active');
+        if (this.pressedKeys.has(key)) {
+          this.pressedKeys.delete(key);
+          this.sendKey(key, 'up');
+          this.highlightKeyBadge(key, false);
+        }
+      };
+
+      btn.addEventListener('touchstart', press, { passive: false });
+      btn.addEventListener('touchend', release, { passive: false });
+      btn.addEventListener('touchcancel', release, { passive: false });
+      btn.addEventListener('mousedown', press);
+      btn.addEventListener('mouseup', release);
+      btn.addEventListener('mouseleave', release);
+    });
+  }
+
+  toggleGamepad() {
+    const gp = document.getElementById('mbtl-gamepad');
+    if (gp) {
+      gp.style.display = gp.style.display === 'none' ? 'flex' : 'none';
+    }
+  }
+
+  toggleQuality() {
+    const next = this.currentQuality === '540p' ? '720p' : '540p';
+    this.currentQuality = next;
+    const qBtn = document.getElementById('mbtl-quality-btn');
+    if (qBtn) {
+      qBtn.textContent = next === '720p' ? '720p (HD)' : '540p (Быстро)';
+    }
+    if (this.dataChannel && this.dataChannel.readyState === 'open') {
+      try {
+        this.dataChannel.send(JSON.stringify({
+          type: 'set_quality',
+          quality: next
+        }));
+      } catch (e) {}
+    }
   }
 
   async checkHostStatus() {
@@ -116,7 +193,7 @@ class MBTLClient {
           overlayEl.style.display = 'flex';
           overlayEl.innerHTML = `
             <div style="font-size: 16px; color: #00ff66; margin-bottom: 8px;">🟢 ХОСТ В СЕТИ</div>
-            <button class="win-btn" onclick="window.mbtlClient.connect()" style="font-size: 12px; padding: 5px 16px; cursor: pointer;">
+            <button class="win-btn" onclick="window.mbtlClient.connect()" style="font-size: 12px; padding: 6px 18px; cursor: pointer;">
               ⚔ Войти на трансляцию
             </button>
           `;
@@ -140,19 +217,22 @@ class MBTLClient {
     if (overlayEl) {
       overlayEl.style.display = 'flex';
       overlayEl.innerHTML = `
-        <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[1/3] ИНИЦИАЛИЗАЦИЯ WEBRTC...</div>
-        <div style="color: #aaa; font-size: 11px;">Сбор сетевых кандидатов STUN...</div>
+        <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[1/3] ПОИСК МАРШРУТОВ STUN...</div>
+        <div style="color: #aaa; font-size: 11px;">Определение внешнего IP для прямого P2P...</div>
       `;
     }
 
     try {
       this.disconnect(); // Сброс старой сессии
 
+      // Только проверенные стабильные Google STUN серверы
       this.pc = new RTCPeerConnection({
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun.services.mozilla.com' }
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' }
         ]
       });
 
@@ -162,6 +242,10 @@ class MBTLClient {
         const videoEl = document.getElementById('mbtl-video');
         if (videoEl && event.streams && event.streams[0]) {
           videoEl.srcObject = event.streams[0];
+          // Обязательные атрибуты для мобильных браузеров (iOS Safari / Android)
+          videoEl.muted = true;
+          videoEl.setAttribute('playsinline', '');
+          videoEl.setAttribute('webkit-playsinline', '');
           videoEl.play().catch(e => console.warn('Video play error:', e));
           if (overlayEl) overlayEl.style.display = 'none';
           this.isConnected = true;
@@ -176,7 +260,7 @@ class MBTLClient {
 
       this.dataChannel.onopen = () => {
         console.log('MBTL DataChannel connected');
-        // Запуск периодического замера пинга каждые 1.2 сек
+        // Периодический замер пинга каждые 1.2 сек
         if (this.pingTimer) clearInterval(this.pingTimer);
         this.pingTimer = setInterval(() => {
           if (this.dataChannel && this.dataChannel.readyState === 'open') {
@@ -212,7 +296,7 @@ class MBTLClient {
       });
       await this.pc.setLocalDescription(offer);
 
-      // Ожидаем завершения сбора кандидатов (Vanilla ICE)
+      // Ожидаем завершения сбора кандидатов (до 7.5 сек для мобильных сетей)
       await new Promise(resolve => {
         if (this.pc.iceGatheringState === 'complete') {
           resolve();
@@ -224,14 +308,14 @@ class MBTLClient {
             }
           };
           this.pc.addEventListener('icegatheringstatechange', checkGathering);
-          setTimeout(resolve, 3500); // 3.5 сек на сбор STUN
+          setTimeout(resolve, 7500); // 7.5 сек для надежного сбора публичного IP на мобильной сети
         }
       });
 
       if (overlayEl) {
         overlayEl.innerHTML = `
-          <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[2/3] ОТПРАВКА ЗАПРОСА...</div>
-          <div style="color: #aaa; font-size: 11px;">Регистрация в лобби...</div>
+          <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[2/3] РЕГИСТРАЦИЯ В ЛОББИ...</div>
+          <div style="color: #aaa; font-size: 11px;">Передача сетевых координат на хост...</div>
         `;
       }
 
@@ -255,7 +339,7 @@ class MBTLClient {
       if (overlayEl) {
         overlayEl.innerHTML = `
           <div style="font-size: 14px; color: #00ffcc; margin-bottom: 6px;">[3/3] ОЖИДАНИЕ ХОСТА...</div>
-          <div style="color: #aaa; font-size: 11px;">Хост-скрипт на ПК формирует видеопоток...</div>
+          <div style="color: #aaa; font-size: 11px;">Хост на ПК формирует поток и открывает P2P...</div>
         `;
       }
 
@@ -265,10 +349,10 @@ class MBTLClient {
         attempts++;
         if (overlayEl && attempts > 1) {
           const subText = overlayEl.querySelector('div:last-child');
-          if (subText) subText.textContent = `Ожидание ответа хоста (${attempts}/30)...`;
+          if (subText) subText.textContent = `Ожидание ответа хоста (${attempts}/35)...`;
         }
 
-        if (attempts > 30) {
+        if (attempts > 35) {
           clearInterval(this.pollTimer);
           this.pollTimer = null;
           if (overlayEl) {
@@ -291,7 +375,6 @@ class MBTLClient {
               clearInterval(this.pollTimer);
               this.pollTimer = null;
               await this.pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-              // Все гости стартуют в режиме зрителя
               this.role = 'spectator';
               this.inQueue = false;
               this.isBlockedByHost = Boolean(data.is_blocked);
@@ -323,7 +406,6 @@ class MBTLClient {
     }
 
     if (this.role === 'player2' || this.inQueue) {
-      // Покинуть бой или выйти из очереди
       try {
         this.dataChannel.send(JSON.stringify({ type: 'leave_queue' }));
       } catch (e) {}
@@ -333,7 +415,6 @@ class MBTLClient {
       this.releaseAllKeys();
       this.updateControlIndicator();
     } else {
-      // Встать в очередь на бой
       try {
         this.dataChannel.send(JSON.stringify({ type: 'join_queue' }));
       } catch (e) {}
@@ -353,7 +434,6 @@ class MBTLClient {
         else if (rtt > 70) color = '#ffff55';
         pingEl.innerHTML = `⚡ Пинг: <span style="color: ${color}; font-weight: bold;">${rtt} ms</span>`;
       }
-      // Отправляем текущий замер пинга хосту
       if (this.dataChannel && this.dataChannel.readyState === 'open') {
         try {
           this.dataChannel.send(JSON.stringify({
@@ -453,7 +533,6 @@ class MBTLClient {
       return;
     }
 
-    // Преобразуем алиас (WASD / JUIO) в каноническую клавишу
     const canonical = this.keyAliases[e.code] || e.code;
     if (!this.allowedKeys.has(canonical)) {
       return;
