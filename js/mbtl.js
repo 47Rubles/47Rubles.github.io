@@ -457,6 +457,24 @@ class MBTLClient {
         }
       };
 
+      this.pc.onconnectionstatechange = () => {
+        console.log(`[WebRTC] Connection state: ${this.pc.connectionState}`);
+        if (this.pc.connectionState === 'connected') {
+          if (overlayEl) overlayEl.style.display = 'none';
+          this.isConnected = true;
+          this.updateControlIndicator();
+        } else if (this.pc.connectionState === 'failed') {
+          if (overlayEl) {
+            overlayEl.style.display = 'flex';
+            overlayEl.innerHTML = `
+              <div style="font-size: 14px; color: #ff5555; margin-bottom: 6px;">❌ СБОЙ P2P ТУННЕЛЯ</div>
+              <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">Не удалось согласовать маршрут с ПК хоста.</div>
+              <button class="win-btn" onclick="window.mbtlClient.connect()">Повторить</button>
+            `;
+          }
+        }
+      };
+
       // DataChannel для клавиш и замера пинга
       this.dataChannel = this.pc.createDataChannel('mbtl-input', {
         ordered: true
@@ -853,7 +871,7 @@ class MBTLClient {
       logEl.innerHTML = logs.map(l => `<div style="margin-bottom: 4px;">${l}</div>`).join('');
     };
 
-    addLog('⏳', 'Версия клиента', 'v2.2 (MQTT WSS + Trickle ICE)');
+    addLog('⏳', 'Версия клиента', 'v2.3 (MQTT WSS + UPnP & Unicast)');
     await new Promise(r => setTimeout(r, 200));
 
     // 1. WebRTC & Codecs
