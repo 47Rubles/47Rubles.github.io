@@ -13,8 +13,8 @@
 class MiniMQTTClient {
   constructor() {
     this.brokers = [
-      'wss://broker.hivemq.com:8884/mqtt',
-      'wss://broker.emqx.io:8084/mqtt'
+      'wss://broker.emqx.io:8084/mqtt',
+      'wss://broker.hivemq.com:8884/mqtt'
     ];
     this.brokerIdx = 0;
     this.ws = null;
@@ -28,6 +28,23 @@ class MiniMQTTClient {
 
   get currentBroker() {
     return this.brokers[this.brokerIdx];
+  }
+
+  waitForConnect(timeoutMs = 6000) {
+    if (this.connected) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      const start = Date.now();
+      const check = () => {
+        if (this.connected) {
+          resolve(true);
+        } else if (Date.now() - start >= timeoutMs) {
+          resolve(false);
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    });
   }
 
   connect() {
@@ -81,13 +98,6 @@ class MiniMQTTClient {
     }, 2000);
   }
 
-  sendConnect() {
-    const enc = new TextEncoder();
-    const cBytes = enc.encode(this.clientId);
-    const p = [0, 4, 0x4D, 0x51, 0x54, 0x54, 4, 2, 0, 30, 0, cBytes.length, ...cBytes];
-    this.ws.send(new Uint8Array([0x10, ...this.encodeLen(p.length), ...p]));
-  }
-
   encodeLen(len) {
     const bytes = [];
     do {
@@ -97,6 +107,27 @@ class MiniMQTTClient {
       bytes.push(digit);
     } while (len > 0);
     return bytes;
+  }
+
+  sendConnect() {
+    const cBytes = new TextEncoder().encode(this.clientId);
+    const variableHeader = [0, 4, 0x4D, 0x51, 0x54, 0x54, 4, 2, 0, 30]; // CleanSession, KeepAlive 30s
+    const payloadLen = variableHeader.length + 2 + cBytes.length;
+    const lenBytes = this.encodeLen(payloadLen);
+
+    const packet = new Uint8Array(1 + lenBytes.length + payloadLen);
+    packet[0] = 0x10;
+    packet.set(lenBytes, 1);
+    let offset = 1 + lenBytes.length;
+    packet.set(variableHeader, offset);
+    offset += variableHeader.length;
+    packet[offset++] = (cBytes.length >> 8) & 0xff;
+    packet[offset++] = cBytes.length & 0xff;
+    packet.set(cBytes, offset);
+
+    try {
+      this.ws.send(packet.buffer);
+    } catch (e) {}
   }
 
   handlePacket(data) {
@@ -137,13 +168,26 @@ class MiniMQTTClient {
     }
   }
 
-  sendSubscribe(topic) {
+  sendSubscribe(topic, packetId = 1) {
     if (!this.ws || !this.connected) return;
     const tBytes = new TextEncoder().encode(topic);
-    const id = 1;
-    const p = [(id >> 8) & 0xff, id & 0xff, (tBytes.length >> 8) & 0xff, tBytes.length & 0xff, ...tBytes, 0];
+    const payloadLen = 2 + 2 + tBytes.length + 1; // packetId (2) + topicLen (2) + topic + QoS 0 (1)
+    const lenBytes = this.encodeLen(payloadLen);
+
+    const packet = new Uint8Array(1 + lenBytes.length + payloadLen);
+    packet[0] = 0x82; // SUBSCRIBE
+    packet.set(lenBytes, 1);
+    let offset = 1 + lenBytes.length;
+    packet[offset++] = (packetId >> 8) & 0xff;
+    packet[offset++] = packetId & 0xff;
+    packet[offset++] = (tBytes.length >> 8) & 0xff;
+    packet[offset++] = tBytes.length & 0xff;
+    packet.set(tBytes, offset);
+    offset += tBytes.length;
+    packet[offset] = 0x00; // QoS 0
+
     try {
-      this.ws.send(new Uint8Array([0x82, ...this.encodeLen(p.length), ...p]));
+      this.ws.send(packet.buffer);
     } catch (e) {}
   }
 
@@ -170,14 +214,27 @@ class MiniMQTTClient {
 
   publish(topic, msg) {
     if (!this.ws || !this.connected) return false;
-    const tBytes = new TextEncoder().encode(topic);
-    const mStr = (typeof msg === 'string') ? msg : JSON.stringify(msg);
-    const mBytes = new TextEncoder().encode(mStr);
-    const p = [(tBytes.length >> 8) & 0xff, tBytes.length & 0xff, ...tBytes, ...mBytes];
     try {
-      this.ws.send(new Uint8Array([0x30, ...this.encodeLen(p.length), ...p]));
+      const tBytes = new TextEncoder().encode(topic);
+      const mStr = (typeof msg === 'string') ? msg : JSON.stringify(msg);
+      const mBytes = new TextEncoder().encode(mStr);
+      const payloadLen = 2 + tBytes.length + mBytes.length;
+      const lenBytes = this.encodeLen(payloadLen);
+
+      const packet = new Uint8Array(1 + lenBytes.length + payloadLen);
+      packet[0] = 0x30; // PUBLISH QoS 0
+      packet.set(lenBytes, 1);
+      let offset = 1 + lenBytes.length;
+      packet[offset++] = (tBytes.length >> 8) & 0xff;
+      packet[offset++] = tBytes.length & 0xff;
+      packet.set(tBytes, offset);
+      offset += tBytes.length;
+      packet.set(mBytes, offset);
+
+      this.ws.send(packet.buffer);
       return true;
     } catch (e) {
+      console.warn('MQTT publish error:', e);
       return false;
     }
   }
@@ -436,13 +493,34 @@ class MBTLClient {
     if (overlayEl) {
       overlayEl.style.display = 'flex';
       overlayEl.innerHTML = `
-        <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[1/3] ПОИСК МАРШРУТОВ STUN...</div>
-        <div style="color: #aaa; font-size: 11px;">Определение внешних и локальных маршрутов...</div>
+        <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[0/3] ПОДКЛЮЧЕНИЕ К СИГНАЛУ...</div>
+        <div style="color: #aaa; font-size: 11px;">Проверка связи с сервером (${this.mqtt.currentBroker.split('//')[1].split('/')[0]})...</div>
       `;
     }
 
     try {
       this.disconnect();
+
+      // Гарантируем, что сигнальный брокер на связи перед формированием оффера
+      if (!this.mqtt.connected) {
+        let isConnected = await this.mqtt.waitForConnect(4000);
+        if (!isConnected) {
+          // Быстро пробуем резервный брокер
+          this.mqtt.brokerIdx = (this.mqtt.brokerIdx + 1) % this.mqtt.brokers.length;
+          this.mqtt.connect();
+          isConnected = await this.mqtt.waitForConnect(4000);
+        }
+        if (!isConnected) {
+          throw new Error(`Сигнальный брокер недоступен. Проверьте интернет или блокировщики рекламы.`);
+        }
+      }
+
+      if (overlayEl) {
+        overlayEl.innerHTML = `
+          <div style="font-size: 14px; color: #ffff77; margin-bottom: 6px;">[1/3] ПОИСК МАРШРУТОВ STUN...</div>
+          <div style="color: #aaa; font-size: 11px;">Определение внешних маршрутов через Anycast STUN...</div>
+        `;
+      }
 
       this.clientId = 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
 
@@ -482,6 +560,24 @@ class MBTLClient {
             overlayEl.innerHTML = `
               <div style="font-size: 14px; color: #ff5555; margin-bottom: 6px;">❌ СБОЙ P2P ТУННЕЛЯ</div>
               <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">Не удалось согласовать маршрут с ПК хоста.</div>
+              <button class="win-btn" onclick="window.mbtlClient.connect()">Повторить</button>
+            `;
+          }
+        }
+      };
+
+      this.pc.oniceconnectionstatechange = () => {
+        console.log(`[WebRTC] ICE state: ${this.pc.iceConnectionState}`);
+        if (this.pc.iceConnectionState === 'connected' || this.pc.iceConnectionState === 'completed') {
+          if (overlayEl) overlayEl.style.display = 'none';
+          this.isConnected = true;
+          this.updateControlIndicator();
+        } else if (this.pc.iceConnectionState === 'failed') {
+          if (overlayEl) {
+            overlayEl.style.display = 'flex';
+            overlayEl.innerHTML = `
+              <div style="font-size: 14px; color: #ff5555; margin-bottom: 6px;">❌ СБОЙ P2P ТУННЕЛЯ</div>
+              <div style="color: #aaa; font-size: 11px; margin-bottom: 8px;">Не удалось пробить прямой маршрут к ПК хоста (NAT/файрвол).</div>
               <button class="win-btn" onclick="window.mbtlClient.connect()">Повторить</button>
             `;
           }
@@ -535,6 +631,13 @@ class MBTLClient {
           this.connectTimeout = null;
         }
         this.mqtt.unsubscribe(this.answerSubTopic);
+
+        if (overlayEl) {
+          overlayEl.innerHTML = `
+            <div style="font-size: 14px; color: #00ff66; margin-bottom: 6px;">[+] ОТВЕТ ХОСТА ПОЛУЧЕН!</div>
+            <div style="color: #aaa; font-size: 11px;">Запуск прямого P2P видеоканала 60 FPS...</div>
+          `;
+        }
 
         try {
           await this.pc.setRemoteDescription(new RTCSessionDescription(payload.answer));
@@ -613,12 +716,17 @@ class MBTLClient {
           type: this.pc.localDescription.type
         }
       };
-      this.mqtt.publish('47os/mbtl/offers', offerPayload);
+      
+      const sent = this.mqtt.publish('47os/mbtl/offers', offerPayload);
+      if (!sent) {
+        throw new Error("Не удалось доставить запрос: обрыв связи с сигнальным сервером.");
+      }
 
+      const brokerName = this.mqtt.currentBroker.split('//')[1].split('/')[0];
       if (overlayEl) {
         overlayEl.innerHTML = `
           <div style="font-size: 14px; color: #00ffcc; margin-bottom: 6px;">[3/3] ОЖИДАНИЕ ХОСТА...</div>
-          <div style="color: #aaa; font-size: 11px;">Открытие P2P прямого туннеля (60 FPS)...</div>
+          <div style="color: #aaa; font-size: 11px;">Запрос отправлен через ${brokerName}. Ожидание ответа ПК хоста...</div>
         `;
       }
 
