@@ -34,6 +34,7 @@ class MiniMQTTClient {
     if (this.ws) {
       try { this.ws.close(); } catch (e) {}
     }
+    this.clientId = 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
     const url = this.currentBroker;
     try {
       this.ws = new WebSocket(url, ['mqtt']);
@@ -54,7 +55,7 @@ class MiniMQTTClient {
 
     this.ws.onerror = () => {
       this.failCount = (this.failCount || 0) + 1;
-      if (this.failCount >= 5) {
+      if (this.failCount >= 2) {
         this.brokerIdx = (this.brokerIdx + 1) % this.brokers.length;
         this.failCount = 0;
       }
@@ -63,6 +64,11 @@ class MiniMQTTClient {
     this.ws.onclose = () => {
       this.connected = false;
       if (this.pingTimer) clearInterval(this.pingTimer);
+      this.failCount = (this.failCount || 0) + 1;
+      if (this.failCount >= 2) {
+        this.brokerIdx = (this.brokerIdx + 1) % this.brokers.length;
+        this.failCount = 0;
+      }
       this.scheduleReconnect();
     };
   }
@@ -249,7 +255,7 @@ class MBTLClient {
   }
 
   checkHostHeartbeat() {
-    const isAlive = (Date.now() - this.lastHostSeen) < 6000;
+    const isAlive = (Date.now() - this.lastHostSeen) < 14000;
     if (!isAlive && this.isOnline) {
       this.isOnline = false;
       this.renderStatusUI(null);
