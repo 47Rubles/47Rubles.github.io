@@ -13,6 +13,7 @@
 class MiniMQTTClient {
   constructor() {
     this.brokers = [
+      'wss://iot.coreflux.cloud:443/mqtt',
       'wss://broker.emqx.io:8084/mqtt',
       'wss://broker.hivemq.com:8884/mqtt'
     ];
