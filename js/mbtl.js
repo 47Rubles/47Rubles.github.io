@@ -542,6 +542,15 @@ class MBTLClient {
           videoEl.muted = true;
           videoEl.setAttribute('playsinline', '');
           videoEl.setAttribute('webkit-playsinline', '');
+
+          // Минимальная задержка и нулевой джиттер-буфер браузера
+          if (event.receiver) {
+            try {
+              if ('playoutDelayHint' in event.receiver) event.receiver.playoutDelayHint = 0;
+              if ('jitterBufferTarget' in event.receiver) event.receiver.jitterBufferTarget = 0;
+            } catch (err) {}
+          }
+
           videoEl.play().catch(e => console.warn('Video play error:', e));
           if (overlayEl) overlayEl.style.display = 'none';
           this.isConnected = true;
@@ -783,19 +792,20 @@ class MBTLClient {
   handleServerMessage(msg) {
     if (msg.type === 'pong') {
       const rtt = Math.round(performance.now() - msg.t);
+      this.smoothedPing = this.smoothedPing ? Math.round(this.smoothedPing * 0.75 + rtt * 0.25) : rtt;
       this.currentPing = rtt;
       const pingEl = document.getElementById('mbtl-win-ping');
       if (pingEl) {
         let color = '#00ff66';
-        if (rtt > 150) color = '#ff5555';
-        else if (rtt > 70) color = '#ffff55';
-        pingEl.innerHTML = `⚡ Пинг: <span style="color: ${color}; font-weight: bold;">${rtt} ms</span>`;
+        if (this.smoothedPing > 120) color = '#ff5555';
+        else if (this.smoothedPing > 60) color = '#ffff55';
+        pingEl.innerHTML = `⚡ Пинг: <span style="color: ${color}; font-weight: bold;">${this.smoothedPing} ms</span>`;
       }
       if (this.dataChannel && this.dataChannel.readyState === 'open') {
         try {
           this.dataChannel.send(JSON.stringify({
             type: 'ping_stat',
-            ping: rtt
+            ping: this.smoothedPing
           }));
         } catch (e) {}
       }
