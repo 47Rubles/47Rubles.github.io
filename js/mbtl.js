@@ -33,6 +33,11 @@ class MiniMQTTClient {
 
   waitForConnect(timeoutMs = 6000) {
     if (this.connected) return Promise.resolve(true);
+    // Для общественных сетей и фаерволов всегда отдаем приоритет порту 443 (Coreflux)
+    if (this.brokerIdx !== 0 && !this.connected) {
+      this.brokerIdx = 0;
+      this.connect();
+    }
     return new Promise((resolve) => {
       const start = Date.now();
       const check = () => {
@@ -73,8 +78,9 @@ class MiniMQTTClient {
 
     this.ws.onerror = () => {
       this.failCount = (this.failCount || 0) + 1;
-      if (this.failCount >= 2) {
-        this.brokerIdx = (this.brokerIdx + 1) % this.brokers.length;
+      // Если запасной брокер на нестандартном порту дал сбой — моментально возвращаемся на защищенный порт 443
+      if (this.brokerIdx !== 0 || this.failCount >= 3) {
+        this.brokerIdx = 0;
         this.failCount = 0;
       }
     };
@@ -83,8 +89,8 @@ class MiniMQTTClient {
       this.connected = false;
       if (this.pingTimer) clearInterval(this.pingTimer);
       this.failCount = (this.failCount || 0) + 1;
-      if (this.failCount >= 2) {
-        this.brokerIdx = (this.brokerIdx + 1) % this.brokers.length;
+      if (this.brokerIdx !== 0 || this.failCount >= 3) {
+        this.brokerIdx = 0;
         this.failCount = 0;
       }
       this.scheduleReconnect();
@@ -96,7 +102,7 @@ class MiniMQTTClient {
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.connect();
-    }, 2000);
+    }, 1500);
   }
 
   encodeLen(len) {
@@ -143,7 +149,7 @@ class MiniMQTTClient {
         if (this.ws && this.connected) {
           try { this.ws.send(new Uint8Array([0xC0, 0x00])); } catch (e) {}
         }
-      }, 20000);
+      }, 10000); // Держим соединение активным каждые 10 секунд
     } else if (type === 3) { // PUBLISH
       let pos = 1;
       let multiplier = 1, len = 0, digit;
@@ -504,12 +510,11 @@ class MBTLClient {
 
       // Гарантируем, что сигнальный брокер на связи перед формированием оффера
       if (!this.mqtt.connected) {
-        let isConnected = await this.mqtt.waitForConnect(4000);
+        let isConnected = await this.mqtt.waitForConnect(3500);
         if (!isConnected) {
-          // Быстро пробуем резервный брокер
-          this.mqtt.brokerIdx = (this.mqtt.brokerIdx + 1) % this.mqtt.brokers.length;
+          this.mqtt.brokerIdx = 0;
           this.mqtt.connect();
-          isConnected = await this.mqtt.waitForConnect(4000);
+          isConnected = await this.mqtt.waitForConnect(3500);
         }
         if (!isConnected) {
           throw new Error(`Сигнальный брокер недоступен. Проверьте интернет или блокировщики рекламы.`);
