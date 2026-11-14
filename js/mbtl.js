@@ -138,40 +138,56 @@ class MiniMQTTClient {
   }
 
   handlePacket(data) {
-    const type = data[0] >> 4;
-    if (type === 2) { // CONNACK
-      this.connected = true;
-      for (const topic of this.subscriptions.keys()) {
-        this.sendSubscribe(topic);
-      }
-      if (this.pingTimer) clearInterval(this.pingTimer);
-      this.pingTimer = setInterval(() => {
-        if (this.ws && this.connected) {
-          try { this.ws.send(new Uint8Array([0xC0, 0x00])); } catch (e) {}
-        }
-      }, 10000); // Держим соединение активным каждые 10 секунд
-    } else if (type === 3) { // PUBLISH
-      let pos = 1;
-      let multiplier = 1, len = 0, digit;
+    let offset = 0;
+    while (offset < data.length) {
+      const prevOffset = offset;
+      const type = data[offset] >> 4;
+      let pos = offset + 1;
+      let multiplier = 1, remLen = 0, digit;
       do {
+        if (pos >= data.length) return;
         digit = data[pos++];
-        len += (digit & 0x7f) * multiplier;
+        remLen += (digit & 0x7f) * multiplier;
         multiplier *= 128;
       } while ((digit & 0x80) !== 0);
-      const topicLen = (data[pos] << 8) | data[pos + 1];
-      pos += 2;
-      const topic = new TextDecoder().decode(data.subarray(pos, pos + topicLen));
-      pos += topicLen;
-      const payloadStr = new TextDecoder().decode(data.subarray(pos));
-      let payload = payloadStr;
-      try { payload = JSON.parse(payloadStr); } catch (e) {}
 
-      const cbs = this.subscriptions.get(topic);
-      if (cbs) {
-        cbs.forEach(cb => {
-          try { cb(payload, topic); } catch (err) { console.warn('MQTT callback error:', err); }
-        });
+      const packetEnd = pos + remLen;
+      if (packetEnd > data.length) return;
+
+      if (type === 2) { // CONNACK
+        this.connected = true;
+        for (const topic of this.subscriptions.keys()) {
+          this.sendSubscribe(topic);
+        }
+        if (this.pingTimer) clearInterval(this.pingTimer);
+        this.pingTimer = setInterval(() => {
+          if (this.ws && this.connected) {
+            try { this.ws.send(new Uint8Array([0xC0, 0x00])); } catch (e) {}
+          }
+        }, 10000); // Держим соединение активным каждые 10 секунд
+      } else if (type === 3) { // PUBLISH
+        if (pos + 2 <= data.length) {
+          const topicLen = (data[pos] << 8) | data[pos + 1];
+          pos += 2;
+          if (pos + topicLen <= data.length) {
+            const topic = new TextDecoder().decode(data.subarray(pos, pos + topicLen));
+            pos += topicLen;
+            const payloadStr = new TextDecoder().decode(data.subarray(pos, Math.min(packetEnd, data.length)));
+            let payload = payloadStr;
+            try { payload = JSON.parse(payloadStr); } catch (e) {}
+
+            const cbs = this.subscriptions.get(topic);
+            if (cbs) {
+              cbs.forEach(cb => {
+                try { cb(payload, topic); } catch (err) { console.warn('MQTT callback error:', err); }
+              });
+            }
+          }
+        }
       }
+
+      offset = packetEnd;
+      if (offset <= prevOffset) break;
     }
   }
 
