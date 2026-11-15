@@ -550,8 +550,22 @@ class MBTLClient {
         iceServers: [
           { urls: 'stun:stun.cloudflare.com:3478' },
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun.nextcloud.com:3478' },
-          { urls: 'stun:stun.sipgate.net:3478' }
+          { urls: 'stun:openrelay.metered.ca:80' },
+          {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          }
         ]
       });
 
@@ -563,6 +577,7 @@ class MBTLClient {
           videoEl.muted = true;
           videoEl.setAttribute('playsinline', '');
           videoEl.setAttribute('webkit-playsinline', '');
+          videoEl.style.transform = 'translateZ(0)';
 
           // Минимальная задержка и нулевой джиттер-буфер браузера
           if (event.receiver) {
@@ -615,9 +630,10 @@ class MBTLClient {
         }
       };
 
-      // DataChannel для клавиш и замера пинга
+      // DataChannel для клавиш и замера пинга (UDP режим: без задержек и повторных отправок)
       this.dataChannel = this.pc.createDataChannel('mbtl-input', {
-        ordered: true
+        ordered: false,
+        maxRetransmits: 0
       });
 
       this.dataChannel.onopen = () => {
@@ -718,8 +734,10 @@ class MBTLClient {
               }
             });
 
-            // При обнаружении публичного маршрута (srflx) ждём 200 мс на финализацию
-            if (e.candidate.type === 'srflx' || (e.candidate.candidate && e.candidate.candidate.includes('srflx'))) {
+            // При обнаружении публичного маршрута (srflx или relay) ждём 200 мс на финализацию
+            const cType = e.candidate.type;
+            const cStr = e.candidate.candidate || '';
+            if (cType === 'srflx' || cType === 'relay' || cStr.includes('srflx') || cStr.includes('relay')) {
               setTimeout(done, 200);
             }
           } else {
