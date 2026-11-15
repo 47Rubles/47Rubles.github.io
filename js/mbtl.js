@@ -300,13 +300,27 @@ class MBTLClient {
       'Digit7': 'Numpad7',
       'Digit8': 'Numpad8',
       'Digit9': 'Numpad9',
-      'Digit4': 'Numpad4'
+      'Digit4': 'Numpad4',
+
+      // Макросы кнопок для Гостя (Игрок 2)
+      'Numpad0': 'Numpad0', // A+B (Дэш/ускорение)
+      'Digit0':  'Numpad0',
+      'KeyC':    'Numpad0', // дубль C -> A+B
+
+      'Numpad5': 'Numpad5', // A+D (Пробитие щита)
+      'Digit5':  'Numpad5',
+      'KeyX':    'Numpad5', // дубль X -> A+D
+
+      'Numpad6': 'Numpad6', // A+B+C (Heat mode)
+      'Digit6':  'Numpad6',
+      'KeyH':    'Numpad6'  // дубль H -> A+B+C
     };
 
     // Канонические разрешенные клавиши файтинга
     this.allowedKeys = new Set([
       'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-      'Numpad7', 'Numpad8', 'Numpad9', 'Numpad4'
+      'Numpad7', 'Numpad8', 'Numpad9', 'Numpad4',
+      'Numpad0', 'Numpad5', 'Numpad6'
     ]);
 
     this.pressedKeys = new Set();

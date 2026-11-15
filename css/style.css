@@ -1046,6 +1046,8 @@
 .mbtl-action-btn.btn-b { background: #ffd0d0; }
 .mbtl-action-btn.btn-c { background: #ffffd0; }
 .mbtl-action-btn.btn-d { background: #d0ffd0; }
+.mbtl-action-btn.btn-macro { background: #e8e8f8; font-size: 10px; }
+.mbtl-action-btn.btn-heat { background: #ffe0b2; }
 
 .mbtl-pad-btn:active,
 .mbtl-action-btn:active,
