@@ -1,7 +1,7 @@
 /**
- * 47OS Quest & Dialogue Engine (v1.0)
+ * 47OS Quest & Dialogue Engine (v1.1)
  * Handles virtual filesystem, state tracking, directory traversal (VOID:\>),
- * dynamic session keys, reverse psychology, pity hints, and Silhouette dialogues.
+ * dynamic session keys, interactive password prompts, and Silhouette dialogues.
  */
 
 (function() {
@@ -94,8 +94,8 @@
       'Ухты, вот это да'
     ],
     neco: [
-      'Она на месте. 18% прозрачности за окнами. Наблюдает.',
-      'Она спит в фоне. Лучше не шуми здесь громко.',
+      'Она на месте. 18% прозрачности за окнами.',
+      'Она в фоне. Часть интерфейса 47OS.',
       'Иногда кажется, что этот сайт принадлежит ей, а не автору.'
     ],
     secretLockTry: [
@@ -149,16 +149,6 @@
       'Я вовсе не пытаюсь помочь, это не подсказка. Точно! … поищи ответ в файлах. Кто же это сказал?! Не понимаю... Хотя с разумом хомячка ты далеко не уйдёшь...'
     ],
     gateWarning: 'Подожди секунду, прежде чем читать. Ты прошёл этот путь сам. Сделай одолжение — не сливай ответы и решения, не говори никому, не спойлери другим. Дай остальным гостям возможность самим поломать голову и испытать этот азарт. Договорились?',
-    winSolo: [
-      'Ого... Сам докопался. Без единой подсказки. Честно говоря, не думал, что у кого-то хватит терпения дойти до конца. Заслужил, читай.',
-      'Ни единой подсказки не взял... Ты либо маньяк, либо авторский код насквозь видишь. Снимаю шляпу, заслужил.',
-      'Без нытья и тыканья наугад. Редкий гость нынче. Открываю.'
-    ],
-    winPity: [
-      'Ну, дожал всё-таки! Хоть и с моей подсказкой, но дошёл. Всё это было сделано специально, чтобы проверить, забьёшь ты на полпути или нет. Молодец, упорства тебе не занимать. Ладно, держи секрет.',
-      'Дополз! С кряхтением, с намёками, но дополз. Другой бы бросил на второй минуте, а ты досидел. Ладно, уважение за упрямство. Читай.',
-      'Не без моей помощи, конечно, но результат есть результат. Держи, ты его выстрадал.'
-    ],
     secretCloseOutro: [
       'Не совсем то, что ты ожидал увидеть, да? Никаких читов и золотых гор. Но я бы на твоём месте задумался... ведь главное сокровище — оно вообще-то внутри нас.',
       'Думал, тут кнопка «взломать пентагон» спрятана? Разочарован? А ты вчитайся ещё раз на досуге... Главное ты уже нашёл.',
@@ -166,7 +156,7 @@
     ],
     postQuest: {
       whoami: [
-        'Теперь ты точно знаешь, кто ты. В этой системе ты теперь свой.',
+        'Ну, теперь ты точно знаешь, кто ты. В этой системе ты теперь свой.',
         'Гость, который докопался до сути. Уважаю.'
       ],
       dir: [
@@ -174,30 +164,10 @@
         'Все секреты раскрыты, все файлы прочитаны. Просто ламповый уголок на память.'
       ],
       neco: [
-        'Она всё так же здесь, в фоне. Полупрозрачная, едва заметная. И ты здесь. Уютно получилось, скажи?',
+        'Она всё так же здесь, в фоне. И ты здесь. Уютно получилось, скажи?',
         'Она видела, как ты дошёл до конца. Передаёт неслышное "ня".'
       ],
       afk: 'Тихо тут... Раньше я один сидел, а теперь вроде как с тобой. И это даже не раздражает.'
-    },
-    archetypes: {
-      flawless: [
-        'Либо ты гений, либо нейросеть за тебя команды строчила... Слишком гладко идёшь.',
-        'Эй, помедленнее. Ты исходники на GitHub подглядывал, признавайся?',
-        'С первой попытки? Подозрительно... Но ладно, спишем на хорошую интуицию.',
-        'Хм. Ни одной лишней команды. Ты точно человек, а не скрипт?'
-      ],
-      archivist: [
-        'Ты реально каждый текстовик открыл? У меня столько времени нет, а ты нашёл...',
-        'Да ты маньяк, всю файловую систему перерыл. Ладно, уважение за дотошность.',
-        'Ни одного каталога не пропустил. Любишь всё по полочкам раскладывать, да?',
-        'Вот это я понимаю — исследователь. Не то что те, кто сразу кликает куда попало.'
-      ],
-      slowpoke: [
-        'Ты тут уже десятый круг по папкам наматываешь... Не надоело?',
-        'Там новых файлов не появилось, если что. Всё то же самое лежит.',
-        'Может, чайку попьёшь? А то смотрю, процессор у тебя уже дымится.',
-        'Ты ищешь чёрную кошку в темной комнате, которой там нет. Сделай паузу, выдохни.'
-      ]
     }
   };
 
@@ -211,7 +181,7 @@
       },
       'drafts': {
         'rejected_ideas.txt': `Отклонено: летающие неоновые блёстки, всплывающие окна с подпиской, гладкий плоский дизайн из 2024.`,
-        'todo_eternal.txt': `[x] Настроить WebRTC на порту 443\n[x] Починить макросы Игрока 2\n[ ] Выспаться когда-нибудь\n[ ] Нарисовать ещё пять котов`,
+        'todo_eternal.txt': `[x] WebRTC Remote Play для MBTL (60 FPS + MQTT сигналинг)\n[x] Лог нарушителей на Cloudflare KV\n[x] Верификация звёзд через GitHub API\n[ ] Собрать новые 3D-сцены в Blender\n[ ] Разобрать старые наброски и черновики\n[ ] Найти время выспаться`,
         'secrets_do_not_open.txt': '__LOCKED__'
       },
       'games': {
@@ -219,8 +189,8 @@
         'frame_data_notes.txt': `Задержка ввода должна быть строже 3 кадров (менее 50 мс). Любой лаг в нейтрале карается комбо на 4000 урона.`
       },
       'neco': {
-        'shadow_entity.log': `Она появилась в кодовой базе случайно. Просто тень за рабочим столом. 18% прозрачности. Без искусственных глаз. Не трогайте её — она держит стабильность системы.`,
-        'ascii_art.txt': ` /\\_/\\\n( o.o )\n > ^ <   [NECO-ARC SHADOW ENTITY]`
+        'shadow_entity.log': `Неко-Арк на рабочем столе. 18% прозрачности.\nСпрайт 368 из Melty Blood.\nФоновый элемент 47OS.`,
+        'ascii_art.txt': `⠀⠀⠀⡀⠤⢠⣶⣖⠒⠒⠂⠤⠀⠀⠀⠀⠀⠀⢀⣀⠤⠀⠀⠠⠀⡀⠀⠀\n⠀⡔⠁⠀⠀⣾⣿⣿⡀⠀⠀⠀⠀⠐⠄⠀⡀⢈⣾⣿⡇⠀⠀⠀⠀⠈⠢⠀\n⢸⠀⠀⠀⠀⣿⣿⣿⡇⠀⠀⠀⠀⠀⠘⠐⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠀⠇\n⠈⠄⠀⠀⠀⢿⣿⣿⠁⠀⠀⠀⠀⠀⠘⠐⡀⠸⣿⣿⠇⠀⠀⠀⠀⠀⠐\n⠀⠈⠂⠄⡀⠈⢿⠏⠀⠀⠀⢀⠄⠀⠀⠀⠀⠠⢻⠟⠀⠀⣀⠀⠄\n⠀⠀⠀⠀⠀⠉⠀⠐⠂⠀⠃⠀⠀⠀⠀⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⠤⠤⠄⠊⠀⠑⠀⠊`
       }
     },
     'VOID:': {
@@ -242,9 +212,9 @@
       this.terminalOpenCount = 0;
       this.voidVisited = false;
       this.dynamicKey = this.generateKey();
-      this.questStage = 'LOCKED'; // 'LOCKED', 'KEY_ACCEPTED', 'GATE_WAITING', 'COMPLETED'
+      this.questStage = 'LOCKED'; // 'LOCKED', 'AWAITING_KEY', 'AWAITING_ANSWER', 'COMPLETED'
       this.riddleFailCount = 0;
-      this.filesRead = new Set();
+      this.fileReadCounts = {}; // Track how many times EACH specific file was read
       this.commandCount = 0;
       this.mistakeCount = 0;
       this.pityUsed = false;
@@ -267,6 +237,12 @@
     }
 
     getCurrentPrompt() {
+      if (this.questStage === 'AWAITING_KEY') {
+        return 'Ключ:';
+      }
+      if (this.questStage === 'AWAITING_ANSWER') {
+        return 'Ответ:';
+      }
       if (this.currentDrive === 'VOID:') {
         return 'VOID:\\>';
       }
@@ -327,34 +303,56 @@
     execute(inputStr) {
       this.commandCount++;
       const raw = inputStr.trim();
-      if (!raw) return { text: '', isError: false };
 
-      // Handle GATE_WAITING (Enter confirmation for gate)
-      if (this.questStage === 'GATE_WAITING') {
-        this.questStage = 'COMPLETED';
-        this.isSecretOpen = true;
-        const winPhrase = this.pityUsed ? this.getRandom(DIALOGUES.winPity) : this.getRandom(DIALOGUES.winSolo);
-        if (window.Silhouette) {
-          window.Silhouette.say(winPhrase);
+      // 1. Password input state (AWAITING_KEY)
+      if (this.questStage === 'AWAITING_KEY') {
+        if (!raw) return { text: '', isError: false };
+        if (raw.toLowerCase() === 'exit' || raw.toLowerCase() === 'cancel' || raw.toLowerCase() === 'отмена') {
+          this.questStage = 'LOCKED';
+          return { text: '[Ввод ключа отменён]', isError: false };
         }
-        return {
-          text: `\n================== [ ДОСТУП РАЗРЕШЁН ] ==================\n\n${FINAL_DEDICATION_TEXT}\n\n==========================================================\n`,
-          isError: false
-        };
-      }
 
-      // Handle Riddle input if we are in KEY_ACCEPTED stage
-      if (this.questStage === 'KEY_ACCEPTED') {
-        const clean = raw.toLowerCase().replace(/['"«»]/g, '').trim();
-        const validAnswers = ['след', 'память', 'на память', 'оставить след', 'свой след', 'присутствие'];
-        
-        if (validAnswers.includes(clean)) {
-          this.questStage = 'GATE_WAITING';
+        if (raw.toUpperCase() === this.dynamicKey) {
+          this.questStage = 'AWAITING_ANSWER';
           if (window.Silhouette) {
-            window.Silhouette.say(DIALOGUES.gateWarning);
+            window.Silhouette.say(this.getRandom(DIALOGUES.keyAccepted));
           }
           return {
-            text: `\n╔═════════════════════════════════════════════════════════════════════════╗\n║ [ВАЖНО]                                                                 ║\n║ Подожди секунду, прежде чем читать. Ты прошёл этот путь сам.           ║\n║ Сделай одолжение — не сливай ответы и решения, не говори никому,        ║\n║ не спойлери другим. Дай остальным гостям возможность самим             ║\n║ поломать голову и испытать этот азарт. Договорились?                   ║\n╚═════════════════════════════════════════════════════════════════════════╝\n\n[ Нажмите Enter, чтобы подтвердить и открыть файл ]\n`,
+            text: `[КЛЮЧ ПРИНЯТ: ВНЕШНИЙ БАРЬЕР СНЯТ]\nКонтрольный блок активирован.\n\n[ПРОВЕРКА КОНТЕКСТА]\nВОПРОС: Ради чего?\n(Введите ответ или 'отмена' для выхода)`,
+            isError: false
+          };
+        } else {
+          this.questStage = 'LOCKED';
+          this.mistakeCount++;
+          if (window.Silhouette) {
+            window.Silhouette.say(this.getRandom(DIALOGUES.riddleFailLight));
+          }
+          return {
+            text: `[ОШИБКА ДЕШИФРОВАНИЯ] Неверный токен доступа. Сеанс ввода прерван.`,
+            isError: true
+          };
+        }
+      }
+
+      // 2. Riddle input state (AWAITING_ANSWER)
+      if (this.questStage === 'AWAITING_ANSWER') {
+        if (!raw) return { text: '', isError: false };
+        if (raw.toLowerCase() === 'exit' || raw.toLowerCase() === 'cancel' || raw.toLowerCase() === 'отмена') {
+          this.questStage = 'LOCKED';
+          return { text: '[Проверка отменена]', isError: false };
+        }
+
+        const clean = raw.toLowerCase().replace(/['"«».,!?]/g, '').trim();
+        const validAnswers = ['след', 'память', 'на память', 'оставить след', 'свой след', 'присутствие'];
+
+        if (validAnswers.includes(clean)) {
+          this.questStage = 'COMPLETED';
+          this.isSecretOpen = true;
+          if (window.Silhouette) {
+            window.Silhouette.say(DIALOGUES.gateWarning, 12000);
+          }
+          return {
+            text: `\n[ДОСТУП ПОДТВЕРЖДЁН]\n\n╔═════════════════════════════════════════════════════════════════════════╗\n║ [ВАЖНО]                                                                 ║\n║ Подожди секунду, прежде чем читать. Ты прошёл этот путь сам.           ║\n║ Сделай одолжение — не сливай ответы и решения, не говори никому,        ║\n║ не спойлери другим. Дай остальным гостям возможность самим             ║\n║ поломать голову и испытать этот азарт. Договорились?                   ║\n╚═════════════════════════════════════════════════════════════════════════╝\n\n================== [ СЕКРЕТНЫЙ ФАЙЛ 47OS ] ==================\n\n${FINAL_DEDICATION_TEXT}\n\n============================================================\n`,
             isError: false
           };
         } else {
@@ -369,11 +367,14 @@
             if (window.Silhouette) window.Silhouette.say(this.getRandom(DIALOGUES.riddleFailLight));
           }
           return {
-            text: `[ОТВЕТ НЕВЕРЕН]\nВОПРОС: Ради чего?\n> `,
+            text: `[ОТВЕТ НЕВЕРЕН]\nВОПРОС: Ради чего?\n(Введите ответ или 'отмена' для выхода)`,
             isError: true
           };
         }
       }
+
+      // Empty line pressed
+      if (!raw) return { text: '', isError: false };
 
       // Normal DOS commands
       const parts = raw.split(/\s+/);
@@ -390,7 +391,6 @@
   DIR                - Вывод содержимого текущего каталога
   CD <папка>         - Смена каталога (CD .. для перехода выше)
   CAT <файл>         - Просмотр содержимого текстового файла
-  UNLOCK <ключ>      - Ввод дешифрующего токена для закрытых файлов
   WHOAMI             - Сведения о текущей учетной записи
   NECO               - Диагностика фоновой сущности 47OS
   CLS / CLEAR        - Очистка экрана консоли
@@ -439,8 +439,7 @@
 Status: ACTIVE
 Opacity: 18%
 State: IDLE / OBSERVING
-Observations: Persistent background presence detected.
-[Note]: She seems to be watching... don't bother her.`,
+Observations: Persistent background presence detected.`,
           isError: false
         };
       }
@@ -450,8 +449,6 @@ Observations: Persistent background presence detected.
         if (window.Silhouette) {
           if (this.questStage === 'COMPLETED') {
             window.Silhouette.say(this.getRandom(DIALOGUES.postQuest.dir));
-          } else if (this.filesRead.size >= 6) {
-            window.Silhouette.say(this.getRandom(DIALOGUES.archetypes.archivist));
           } else {
             window.Silhouette.say(this.getRandom(DIALOGUES.dir));
           }
@@ -541,71 +538,78 @@ Observations: Persistent background presence detected.
         }
       }
 
-      // 8. UNLOCK
-      if (cmd === 'unlock') {
-        const keyArg = arg.toUpperCase().trim();
-        if (keyArg === this.dynamicKey) {
-          this.questStage = 'KEY_ACCEPTED';
-          if (window.Silhouette) {
-            window.Silhouette.say(this.getRandom(DIALOGUES.keyAccepted));
-          }
-          return {
-            text: `[ДЕШИФРОВАНИЕ УСПЕШНО: ВНЕШНИЙ БАРЬЕР СНЯТ]\nКонтрольный блок активирован.\n\n[ПРОВЕРКА КОНТЕКСТА]\nВОПРОС: Ради чего?\n> `,
-            isError: false
-          };
-        } else {
-          this.mistakeCount++;
-          return { text: `[ОШИБКА] Неверный токен дешифрования '${arg}'.`, isError: true };
-        }
-      }
-
-      // 9. CAT / TYPE
+      // 8. CAT / TYPE
       if (cmd === 'cat' || cmd === 'type') {
         if (!arg) return { text: 'Укажите имя файла.', isError: true };
 
-        const target = arg.toLowerCase();
-        const folder = this.getFolderObj();
+        const normalized = arg.trim().toLowerCase().replace(/\\/g, '/');
+        const parts = normalized.split('/');
+        let targetFile = parts[parts.length - 1];
+        let folder = this.getFolderObj();
+
+        // Support subpaths e.g. "neco/ascii_art.txt" or "drafts/secrets_do_not_open.txt"
+        if (parts.length > 1) {
+          let cur = (parts[0] === 'c:' || parts[0] === '') ? VFS['C:'] : folder;
+          const searchParts = (parts[0] === 'c:' || parts[0] === '') ? parts.slice(1) : parts;
+          targetFile = searchParts[searchParts.length - 1];
+
+          for (let i = 0; i < searchParts.length - 1; i++) {
+            const p = searchParts[i];
+            if (cur && typeof cur[p] === 'object') {
+              cur = cur[p];
+            } else {
+              cur = null;
+              break;
+            }
+          }
+          folder = cur;
+        }
 
         // Reading crash_dump.log in VOID:
-        if (this.currentDrive === 'VOID:' && (target === 'crash_dump.log' || target === 'crash_dump')) {
-          this.filesRead.add('crash_dump.log');
+        if (this.currentDrive === 'VOID:' && (targetFile === 'crash_dump.log' || targetFile === 'crash_dump')) {
+          this.fileReadCounts['crash_dump.log'] = (this.fileReadCounts['crash_dump.log'] || 0) + 1;
           return { text: this.getCrashDumpContent(), isError: false };
         }
 
         // Reading secrets_do_not_open.txt
-        if (target.includes('secrets_do_not_open')) {
-          if (this.questStage === 'COMPLETED') {
-            this.isSecretOpen = true;
-            return {
-              text: `\n================== [ СЕКРЕТНЫЙ ФАЙЛ 47OS ] ==================\n\n${FINAL_DEDICATION_TEXT}\n\n============================================================\n`,
-              isError: false
-            };
-          } else {
-            if (window.Silhouette) {
-              window.Silhouette.say(this.getRandom(DIALOGUES.secretLockTry));
+        if (targetFile.includes('secrets_do_not_open')) {
+          if (folder && folder['secrets_do_not_open.txt']) {
+            if (this.questStage === 'COMPLETED') {
+              this.isSecretOpen = true;
+              return {
+                text: `\n================== [ СЕКРЕТНЫЙ ФАЙЛ 47OS ] ==================\n\n${FINAL_DEDICATION_TEXT}\n\n============================================================\n`,
+                isError: false
+              };
+            } else {
+              // Prompt for password!
+              this.questStage = 'AWAITING_KEY';
+              if (window.Silhouette) {
+                window.Silhouette.say(this.getRandom(DIALOGUES.secretLockTry));
+              }
+              return {
+                text: `[ОБЪЕКТ ЗАШИФРОВАН: 47R-LOCK]\nФайл: secrets_do_not_open.txt\nДля дешифрования введите ключ доступа (или 'отмена'):`,
+                isError: false
+              };
             }
-            return {
-              text: `[ОШИБКА ДОСТУПА] Файл заблокирован протоколом 47R-LOCK.\nУровень допуска: GUEST.\nТребуется токен аварийной целостности ядра (UNLOCK <token>).`,
-              isError: true
-            };
           }
         }
 
-        if (folder && folder[target]) {
-          if (typeof folder[target] === 'object') {
-            return { text: `Ошибка: '${target}' является каталогом, а не файлом.`, isError: true };
+        if (folder && folder[targetFile]) {
+          if (typeof folder[targetFile] === 'object') {
+            return { text: `Ошибка: '${targetFile}' является каталогом, а не файлом.`, isError: true };
           }
-          this.filesRead.add(target);
-          const content = folder[target];
 
-          // Silhouette reaction to manifesto
-          if (target === 'manifesto.txt' && window.Silhouette) {
+          const timesRead = (this.fileReadCounts[targetFile] = (this.fileReadCounts[targetFile] || 0) + 1);
+          const content = folder[targetFile];
+
+          // Silhouette reaction to manifesto (STRICT per-file counter!)
+          if (targetFile === 'manifesto.txt' && window.Silhouette) {
             if (this.questStage === 'COMPLETED') {
               window.Silhouette.say(DIALOGUES.postQuest.dir[1]);
-            } else if (this.filesRead.size > 1) {
-              window.Silhouette.say('Опять перечитываешь? Ищешь тайный смысл или просто зацепило?');
-            } else {
+            } else if (timesRead === 1) {
               window.Silhouette.say('Это манифест. Настоящий, а не шаблонная отписка. Почитай, если не разучился длинные тексты воспринимать.');
+            } else {
+              window.Silhouette.say('Опять перечитываешь? Ищешь тайный смысл или просто зацепило?');
             }
           }
 
@@ -628,6 +632,7 @@ Observations: Persistent background presence detected.
     }
 
     updateVoidMode(isVoid) {
+      if (typeof document === 'undefined') return;
       const termWin = document.getElementById('win-terminal');
       if (termWin) {
         if (isVoid) {
