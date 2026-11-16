@@ -626,33 +626,100 @@
     </div>
   </div>
 
+  <!-- Window 10: MS-DOS Terminal -->
+  <div class="window" id="win-terminal" style="top: 70px; left: 140px; width: 620px; display: none;">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <span>💻</span> Сеанс MS-DOS [47OS Prompt]
+      </div>
+      <div class="title-bar-controls">
+        <button class="title-btn btn-minimize">_</button>
+        <button class="title-btn btn-maximize">口</button>
+        <button class="title-btn btn-close">✕</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="terminal-body" id="terminal-body">
+        <div id="terminal-output">
+          <div class="term-line term-out">47OS Virtual DOS [Version 1.98]</div>
+          <div class="term-line term-out">(C) Корпорация 47Rubles, 1998-2026. Все права защищены.</div>
+          <div class="term-line term-out">Введите 'help' для получения списка доступных команд.</div>
+          <div class="term-line" style="margin-bottom: 8px;"></div>
+        </div>
+        <div class="terminal-input-row">
+          <span class="terminal-prompt" id="terminal-prompt">C:\&gt;&nbsp;</span>
+          <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" autofocus />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Window 11: Run Dialog -->
+  <div class="window" id="win-run" style="top: 190px; left: 240px; width: 380px; display: none; z-index: 4000;">
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <span>⚙</span> Запуск программы
+      </div>
+      <div class="title-bar-controls">
+        <button class="title-btn btn-close">✕</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <div class="run-dialog-content">
+        <svg viewBox="0 0 32 32" class="run-dialog-icon">
+          <rect x="2" y="6" width="28" height="20" rx="2" fill="#fff" stroke="#000" stroke-width="2"/>
+          <rect x="4" y="8" width="12" height="6" fill="#000080"/>
+          <line x1="8" y1="18" x2="24" y2="18" stroke="#444" stroke-width="1.5"/>
+          <line x1="8" y1="21" x2="20" y2="21" stroke="#444" stroke-width="1.5"/>
+          <polygon points="20,10 28,18 20,26" fill="#e5a00d"/>
+        </svg>
+        <div style="flex: 1;">
+          <div>Введите имя программы, папки, документа или ресурса Интернета, которые требуется открыть.</div>
+          <div class="run-dialog-input-row">
+            <label for="run-dialog-input"><strong>Открыть:</strong></label>
+            <input type="text" id="run-dialog-input" class="run-input-field" placeholder="cmd" autocomplete="off" spellcheck="false" />
+          </div>
+          <div id="run-error-msg" style="color: #c00000; font-size: 10px; margin-top: 6px; display: none;"></div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px;">
+        <button class="win-btn" id="run-btn-ok" style="min-width: 64px;">OK</button>
+        <button class="win-btn" onclick="window.winManager.closeWindow('win-run')" style="min-width: 64px;">Отмена</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Start Menu -->
   <div id="start-menu">
     <div class="start-sidebar">47OS 98</div>
     <div class="start-items">
-      <div class="start-item" onclick="window.winManager.openWindow('win-dialogue'); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.winManager.openWindow('win-dialogue'); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>⚠</span> <span>НЕ_ОТКРЫВАТЬ!.txt</span>
       </div>
-      <div class="start-item" onclick="window.winManager.openWindow('win-gallery'); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.winManager.openWindow('win-gallery'); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>🖼</span> <span>Галерея 47R</span>
       </div>
-      <div class="start-item" onclick="window.winManager.openWindow('win-projects'); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.winManager.openWindow('win-projects'); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>💾</span> <span>Проекты и Код</span>
       </div>
-      <div class="start-item" onclick="window.winManager.openWindow('win-player'); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.winManager.openWindow('win-player'); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>🎵</span> <span>CD Плеер</span>
       </div>
-      <div class="start-item" onclick="window.dialogueMgr.openGuestbook(); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.dialogueMgr.openGuestbook(); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>📋</span> <span>Лог нарушителей</span>
       </div>
-      <div class="start-item" onclick="window.starManager.openModal(); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.starManager.openModal(); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>★</span> <span>Оценить 47OS</span>
       </div>
-      <div class="start-item" onclick="window.mbtlClient.openWindow(); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" onclick="window.mbtlClient.openWindow(); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>⚔</span> <span>МБТЛ.exe</span>
       </div>
       <div class="start-divider"></div>
-      <div class="start-item" onclick="window.open('https://github.com/47Rubles', '_blank'); document.getElementById('start-menu').style.display='none';">
+      <div class="start-item" id="start-item-run" onclick="window.winManager.openWindow('win-run'); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
+        <span>⚙</span> <span>Выполнить...</span>
+      </div>
+      <div class="start-divider"></div>
+      <div class="start-item" onclick="window.open('https://github.com/47Rubles', '_blank'); document.getElementById('start-menu').style.display='none'; document.getElementById('start-btn').classList.remove('active');">
         <span>🌐</span> <span>GitHub Профиль</span>
       </div>
       <div class="start-divider"></div>
@@ -695,6 +762,9 @@
   <script src="js/gallery.js"></script>
   <script src="js/star.js"></script>
   <script src="js/mbtl.js?v=3.3"></script>
+  <script src="js/quest_engine.js"></script>
+  <script src="js/silhouette.js"></script>
+  <script src="js/terminal.js"></script>
 
   <script>
     function updateClock() {
@@ -706,6 +776,52 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    // Run Dialog Handler (Launch Terminal)
+    (function setupRunDialog() {
+      const runInput = document.getElementById('run-dialog-input');
+      const runBtnOk = document.getElementById('run-btn-ok');
+      const runErrMsg = document.getElementById('run-error-msg');
+      const winRun = document.getElementById('win-run');
+
+      function executeRun() {
+        if (!runInput) return;
+        const val = runInput.value.trim().toLowerCase();
+        if (['cmd', 'dos', 'command', 'terminal', 'msdos', 'cmd.exe', 'command.com'].includes(val)) {
+          if (runErrMsg) runErrMsg.style.display = 'none';
+          if (window.winManager) {
+            window.winManager.closeWindow('win-run');
+            window.winManager.openWindow('win-terminal');
+          }
+          runInput.value = '';
+        } else if (val) {
+          if (runErrMsg) {
+            runErrMsg.textContent = `Не удается найти '${val}'. Проверьте правильность имени.`;
+            runErrMsg.style.display = 'block';
+          }
+        }
+      }
+
+      if (runBtnOk) runBtnOk.addEventListener('click', executeRun);
+      if (runInput) {
+        runInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            executeRun();
+          }
+        });
+      }
+
+      if (winRun) {
+        winRun.addEventListener('win:opened', () => {
+          if (runErrMsg) runErrMsg.style.display = 'none';
+          if (runInput) {
+            runInput.value = '';
+            runInput.focus();
+          }
+        });
+      }
+    })();
   </script>
 
 </body>
